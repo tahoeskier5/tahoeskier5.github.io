@@ -1,0 +1,562 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Tube & Coil Sizer (sccm / ΔP)</title>
+<style>
+  :root { --bg:#0f1220; --card:#161a2b; --muted:#9aa3b2; --fg:#e9edf5; --accent:#6ea8fe; --ok:#27c093; --warn:#ffcc66; }
+  html,body{height:100%;background:var(--bg);color:var(--fg);font:14px/1.4 system-ui,Segoe UI,Roboto,Helvetica,Arial;margin:0}
+  h1{font-size:20px;margin:8px 0 16px}
+  .wrap{max-width:1200px;margin:0 auto;padding:16px}
+  .grid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  .card{background:var(--card);border-radius:14px;padding:14px;box-shadow:0 6px 20px rgba(0,0,0,.25)}
+  .row{display:grid;grid-template-columns:220px 1fr 120px;gap:10px;align-items:center;margin:6px 0}
+  label{color:var(--muted)}
+  input,select,button{
+    background:#0e1322;color:var(--fg);border:1px solid #2a3150;border-radius:10px;padding:8px 10px;
+    outline:none
+  }
+  input:focus,select:focus{border-color:var(--accent)}
+  button{cursor:pointer;background:var(--accent);border-color:transparent;font-weight:600}
+  button.secondary{background:#2a3150}
+  .muted{color:var(--muted);font-size:12px}
+  .result{display:flex;justify-content:space-between;padding:8px 0;border-bottom:1px dashed #2a3150}
+  .result:last-child{border-bottom:none}
+  .num{font-variant-numeric:tabular-nums}
+  .hidden{display:none}
+  @media (max-width:960px){ .grid{grid-template-columns:1fr} .row{grid-template-columns:160px 1fr 100px} }
+
+  /* Banner */
+  #app-banner {
+    position: sticky; top: 0; z-index: 5;
+    background: linear-gradient(90deg, #1b2240, #16213a);
+    border-bottom: 1px solid #2a3150;
+    padding: 10px 16px;
+  }
+  #app-banner .brand { display:flex; align-items:center; gap:10px; }
+  #app-banner .logo { user-select:none; }
+  #app-banner #bannerName { font-weight:800; letter-spacing:.2px; user-select:none; }
+  #app-banner .dash { opacity:.6 }
+  #app-banner .hint { margin-left:auto; opacity:.35; font-size:12px }
+
+  /* Easter-egg toast */
+  .egg-toast {
+    position: fixed; left: 50%; transform: translateX(-50%);
+    top: 72px; background:#243155; border:1px solid #405289; color:#e9edf5;
+    padding:10px 14px; border-radius:10px; box-shadow:0 8px 24px rgba(0,0,0,.35);
+    font-size:14px; opacity:0; animation: toastIn .25s ease forwards;
+  }
+  @keyframes toastIn { to { opacity:1; transform:translate(-50%,0);} }
+
+  /* Floating emojis */
+  .particle {
+    position: fixed; font-size:22px; pointer-events:none; z-index: 9999;
+    animation: floatDown 2.2s linear forwards;
+  }
+  @keyframes floatDown {
+    from { transform: translateY(-20px); opacity:1 }
+    to   { transform: translateY(120vh); opacity:0 }
+  }
+
+  /* Optional: quick theme pulse during egg */
+  body.party { animation: hue 1.5s ease 1 }
+  @keyframes hue { 0%{filter:hue-rotate(0deg)} 50%{filter:hue-rotate(50deg)} 100%{filter:hue-rotate(0deg)} }
+</style>
+</head>
+<body>
+
+<!-- Banner -->
+<header id="app-banner">
+  <div class="brand">
+    <span class="logo" title="Tube & Coil Sizer">🔧</span>
+    <span id="bannerName">YOUR NAME</span>
+    <span class="dash">—</span>
+    <span>Tube & Coil Sizer</span>
+    <small class="hint">psst… ↑↑↓↓←→←→ B A</small>
+  </div>
+</header>
+
+<div class="wrap">
+  <h1>Straight / Helical Tube Cooler Sizer</h1>
+  <div class="grid">
+    <div class="card">
+      <div class="row">
+        <label for="mode">Sizing mode</label>
+        <select id="mode">
+          <option>Given sccm → solve L</option>
+          <option>Given ΔP → solve mdot & L</option>
+        </select>
+        <span></span>
+      </div>
+
+      <div class="row">
+        <label for="geom">Geometry</label>
+        <select id="geom">
+          <option>Straight tube</option>
+          <option>Helical coil</option>
+        </select>
+        <span class="muted">Coil adds spacing effect + wraps/height</span>
+      </div>
+
+      <div class="row">
+        <label for="lenUnit">Length units</label>
+        <select id="lenUnit">
+          <option>mm</option>
+          <option>in</option>
+        </select>
+        <span class="muted">Affects OD, wall, coil Ø, pitch, outputs</span>
+      </div>
+
+      <div class="row">
+        <label for="gas">Gas</label>
+        <select id="gas">
+          <option>Air</option>
+          <option>Nitrogen</option>
+          <option>Oxygen</option>
+          <option>Argon</option>
+          <option>CO2</option>
+          <option>HF</option>
+        </select>
+        <span class="muted">HF = proxy (μ×1.10, k×0.70)</span>
+      </div>
+
+      <div class="row">
+        <label for="Pkpa">Pressure [kPa]</label>
+        <input id="Pkpa" type="number" step="0.1" />
+        <span class="muted">Gas side</span>
+      </div>
+
+      <div class="row">
+        <label for="epsrel">Roughness ε/D [-]</label>
+        <input id="epsrel" type="number" step="1e-6" />
+        <span></span>
+      </div>
+
+      <div class="row">
+        <label for="sccm">Flow [sccm]</label>
+        <input id="sccm" type="number" step="0.01" />
+        <select id="std">
+          <option>20 °C & 1 atm (NTP)</option>
+          <option>0 °C & 1 atm (STP)</option>
+          <option>25 °C & 1 atm</option>
+        </select>
+      </div>
+
+      <div class="row">
+        <label for="Tin">T_in [°C]</label>
+        <input id="Tin" type="number" step="0.1" />
+        <label for="Tout">T_out [°C]</label>
+        <input id="Tout" type="number" step="0.1" />
+      </div>
+
+      <div class="row">
+        <label for="Tamb">Ambient [°C]</label>
+        <input id="Tamb" type="number" step="0.1" />
+        <span class="muted">for external convection</span>
+      </div>
+
+      <div class="row">
+        <label for="OD">Tube OD</label>
+        <input id="OD" type="number" step="0.01" />
+        <label for="wall">Wall</label>
+        <input id="wall" type="number" step="0.01" />
+      </div>
+
+      <div id="coilRows">
+        <div class="row">
+          <label for="Dcoil">Coil diameter (CL)</label>
+          <input id="Dcoil" type="number" step="0.1" />
+          <label for="pitch">Pitch</label>
+          <input id="pitch" type="number" step="0.1" />
+        </div>
+      </div>
+
+      <div class="row">
+        <label for="mat">Tube material</label>
+        <select id="mat">
+          <option data-k="16">Stainless Steel (304/316)</option>
+          <option data-k="380">Copper</option>
+          <option data-k="205">Aluminum</option>
+          <option data-k="45">Carbon Steel</option>
+          <option data-k="7">Titanium</option>
+          <option data-k="9.8">Inconel 625</option>
+          <option data-k="0.25">PTFE (Teflon)</option>
+        </select>
+        <span class="muted">k [W/m·K]</span>
+      </div>
+
+      <div class="row">
+        <label for="ext">External convection</label>
+        <select id="ext">
+          <option>natural</option>
+          <option>forced</option>
+        </select>
+        <label for="Uair">Air velocity [m/s]</label>
+        <input id="Uair" type="number" step="0.01" />
+      </div>
+
+      <hr style="border:none;border-top:1px solid #2a3150;margin:12px 0">
+      <div class="row">
+        <label for="dP">ΔP across tube [kPa]</label>
+        <input id="dP" type="number" step="0.001" />
+        <span class="muted">Only used in ΔP mode</span>
+      </div>
+      <div class="row">
+        <label for="Kminor">Minor losses K_total [-]</label>
+        <input id="Kminor" type="number" step="0.01" />
+        <label for="fmult">Coil f multiplier [-]</label>
+        <input id="fmult" type="number" step="0.01" />
+      </div>
+
+      <div class="row">
+        <button id="runBtn">Run Calculation</button>
+        <button class="secondary" id="defaultsBtn">Reset Defaults</button>
+        <span></span>
+      </div>
+      <div class="muted">Engineering estimates; ideal-gas & empirical correlations.</div>
+    </div>
+
+    <div class="card" id="results">
+      <div class="result"><div>Required tube length</div><div class="num" id="L_required">–</div></div>
+      <div class="result coilOnly"><div>Estimated wraps</div><div class="num" id="wraps">–</div></div>
+      <div class="result coilOnly"><div>Coil height</div><div class="num" id="coil_height">–</div></div>
+      <div class="result"><div>Mass flow [kg/s]</div><div class="num" id="mdot">–</div></div>
+      <div class="result"><div>Mass flow [sccm]</div><div class="num" id="sccm_out">–</div></div>
+      <div class="result"><div>Overall U<sub>o</sub></div><div class="num" id="Uo">–</div></div>
+      <div class="result"><div>Internal h<sub>i</sub></div><div class="num" id="hi">–</div></div>
+      <div class="result"><div>External h<sub>o</sub></div><div class="num" id="ho">–</div></div>
+      <div class="result"><div>Re (internal)</div><div class="num" id="Re">–</div></div>
+      <div class="result"><div>Darcy f</div><div class="num" id="fDarcy">–</div></div>
+      <div class="result"><div>Mean velocity V</div><div class="num" id="V">–</div></div>
+      <div class="result"><div>Q total</div><div class="num" id="Qtotal">–</div></div>
+      <div class="result"><div>q′ per length</div><div class="num" id="qprime">–</div></div>
+      <div class="result"><div>Iterations</div><div class="num" id="iters">–</div></div>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ===== Banner: hardcoded name + Konami-only easter egg ===== */
+(function(){
+  // Set your name here:
+  const HARD_CODED_NAME = "Author: Sean Ferneyhough";
+  document.getElementById("bannerName").textContent = HARD_CODED_NAME;
+
+  // Konami code (arrows, then b a)
+  const seq = ["ArrowUp","ArrowUp","ArrowDown","ArrowDown","ArrowLeft","ArrowRight","ArrowLeft","ArrowRight","b","a"];
+  let buf = [];
+
+  function toast(msg){
+    const t = document.createElement("div");
+    t.className = "egg-toast";
+    t.textContent = msg;
+    document.body.appendChild(t);
+    setTimeout(()=>t.remove(), 2200);
+  }
+  function confetti(){
+    const emojis = ["❄️","🔧","🧊","⚙️","🌀","💧"];
+    for (let i=0;i<24;i++){
+      const s = document.createElement("div");
+      s.className = "particle";
+      s.textContent = emojis[Math.floor(Math.random()*emojis.length)];
+      s.style.left = (Math.random()*100)+"vw";
+      s.style.top  = "-10px";
+      s.style.animationDelay = (Math.random()*0.6)+"s";
+      document.body.appendChild(s);
+      setTimeout(()=>s.remove(), 2500);
+    }
+    document.body.classList.add("party");
+    setTimeout(()=>document.body.classList.remove("party"), 1500);
+  }
+  function triggerEgg(){
+    confetti();
+    toast("Easter egg unlocked: thermodynamics is fun 🧊");
+  }
+
+  window.addEventListener("keydown", (e)=>{
+    const key = (e.key.length === 1) ? e.key.toLowerCase() : e.key;
+    buf.push(key);
+    if (buf.length > seq.length) buf.shift();
+    const match = seq.every((k,i)=> (k.length===1 ? k : k) === buf[i]);
+    if (match){ triggerEgg(); buf = []; }
+  });
+})();
+
+/* ===== units ===== */
+function toMeters(x, unit){ if (unit==="mm") return x/1000.0; if (unit==="in") return x*0.0254; return x; }
+function fromMeters(xm, unit){ if (unit==="mm") return (xm*1000.0); if (unit==="in") return (xm/0.0254); return xm; }
+function fmtLen(xm, unit){
+  const v = fromMeters(xm, unit);
+  const s = Math.abs(v)>=1000 || Math.abs(v)<0.001 ? v.toExponential(3) : v.toFixed(3);
+  return `${s} ${unit}`;
+}
+
+/* ===== properties & helpers ===== */
+const Ru = 8.314462618; // J/mol-K
+const M_DEFAULTS = {
+  "air":0.0289652, "nitrogen":0.0280134, "n2":0.0280134, "oxygen":0.0319988, "o2":0.0319988,
+  "argon":0.039948, "co2":0.0440095, "hf":0.020006
+};
+function molarMassGuess(g){ const k=(g||"air").trim().toLowerCase(); return M_DEFAULTS[k] ?? M_DEFAULTS["air"]; }
+function propsAirLike(T,P){
+  const rho = P/(287.05*T);
+  const mu  = 1.716e-5 * Math.pow(T/273.15,1.5) * (273.15+110.4)/(T+110.4);
+  const k   = 0.024 + 7e-5*(T-273.15);
+  const cp  = 1005.0 + 0.1*(T-300.0);
+  const Pr  = cp*mu/k;
+  return {rho,mu,k,cp,Pr};
+}
+function propsGas(gas, T, P){
+  // species-specific density via ideal gas
+  const M = molarMassGuess(gas);            // kg/mol from the small table
+  const Rspec = Ru / M;                     // J/(kg·K)
+  let rho = P / (Rspec * T);                // kg/m^3
+
+  // start from air-like μ, k, cp then tweak
+  let {mu, k, cp, Pr} = (function(){
+    const a = propsAirLike(T, P);
+    return {mu: a.mu, k: a.k, cp: a.cp, Pr: a.Pr};
+  })();
+
+  // Optional: simple species tweaks (examples)
+  const g = (gas||"").trim().toLowerCase();
+  if (g==="nitrogen" || g==="n2") { /* μ,k,cp already close to air */ }
+  if (g==="argon")  { mu *= 0.95; k *= 0.75; }
+  if (g==="co2")    { mu *= 1.10; k *= 0.80; cp *= 0.90; }
+
+  if (g==="hf" || g==="hydrogen fluoride"){ mu *= 1.10; k *= 0.70; }
+
+  Pr = cp * mu / k;
+  return {rho, mu, k, cp, Pr};
+}
+function sccmToKgPerS(q_sccm, gas, Tstd, Pstd){
+  const M=molarMassGuess(gas); const q_m3_s=(q_sccm*1e-6)/60.0;
+  const nDot=q_m3_s*(Pstd/(Ru*Tstd)); return nDot*M;
+}
+function kgPerSToSccm(mdot, gas, Tstd, Pstd){
+  const M=molarMassGuess(gas); const nDot=mdot/M; const q_m3_s=nDot*(Ru*Tstd)/Pstd;
+  return q_m3_s*60.0*1e6;
+}
+
+/* ===== correlations ===== */
+function spacingFactor(pitch, Do){
+  const r = Math.max(pitch/Do, 0.5);
+  if (r>=3) return 1.0;
+  if (r>=1.5) return 0.8 + 0.2*(r-1.5)/(3-1.5);
+  return Math.max(0.65, 0.8 - 0.15*(1.5-r)/(1.5-1.0));
+}
+function hExternalNatural(Do, Ts, Tinf){
+  const Tf=0.5*(Ts+Tinf); const {rho,mu,k,cp,Pr}=propsAirLike(Tf,101325.0);
+  const beta=1.0/Tf, g=9.80665, nu=mu/rho, alpha=k/(rho*cp);
+  const dT=Math.max(Math.abs(Ts-Tinf),1e-6);
+  const RaD=g*beta*dT*Math.pow(Do,3)/(nu*alpha);
+  const Nu=Math.sqrt(0.60 + Math.pow(0.387*Math.pow(RaD,1/6)/(Math.pow(1+(0.559/Pr)**(9/16),(8/27))),2));
+  return Nu*k/Do;
+}
+function hExternalForced(Do, Ts, Tinf, Uinf){
+  if (Uinf<=1e-6) return hExternalNatural(Do,Ts,Tinf);
+  const Tf=0.5*(Ts+Tinf); const {rho,mu,k,cp,Pr}=propsAirLike(Tf,101325.0);
+  const ReD=rho*Uinf*Do/mu; if (ReD<1e-3) return hExternalNatural(Do,Ts,Tinf);
+  const Nu=0.3 + (0.62*Math.sqrt(ReD)*Math.cbrt(Pr))/Math.pow(1+Math.pow(0.4/Pr,2/3),0.25)*Math.pow(1+Math.pow(ReD/282000,5/8),4/5);
+  return Nu*k/Do;
+}
+function hInternalGnielinski(mdot, Di, Tbulk, P, gas, epsRel){
+  const {rho,mu,k,cp,Pr}=propsGas(gas,Tbulk,P);
+  const A=0.25*Math.PI*Di*Di; const V=mdot/(A*rho + 1e-30);
+  const Re=Math.max(rho*V*Di/(mu+1e-30),1e-9);
+  let Nu,regime,f;
+  if (Re<2300){ Nu=4.36; regime="laminar"; }
+  else{
+    f=1.0/Math.pow(-1.8*Math.log10(Math.pow(epsRel/3.7,1.11)+6.9/Re),2);
+    Nu=(f/8)*(Re-1000)*Pr/(1+12.7*Math.sqrt(f/8)*(Math.pow(Pr,2/3)-1));
+    Nu=Math.max(Nu,3.66); regime="turbulent";
+  }
+  return {h:Nu*k/Di, Re, Pr, regime};
+}
+
+/* ===== thermal sizing (given mdot) ===== */
+function requiredLength({gas, mdot, Pin, Tin, Tout, Tamb, Do, Di, kWall, epsRel, geom, Dcoil, pitch, extMode, Uair, maxIter=30, tolTs=0.25}){
+  if (!(Tamb < Tout && Tout < Tin)) throw new Error("Require Tamb < Tout < Tin.");
+  if (!(0 < Di && Di < Do)) throw new Error("Require 0 < ID < OD.");
+  let Tbulk = 0.5*(Tin+Tout);
+  let Ts_out = Tamb + 0.30*(Tbulk-Tamb);
+  let Uo=NaN, h_i=NaN, h_o=NaN, Re=NaN, regime="";
+  for (let it=0; it<maxIter; it++){
+    const r=hInternalGnielinski(mdot,Di,Tbulk,Pin,gas,epsRel); h_i=r.h; Re=r.Re; regime=r.regime;
+    const h_o_base=(extMode==="forced")?hExternalForced(Do,Ts_out,Tamb,Math.max(Uair,0)):hExternalNatural(Do,Ts_out,Tamb);
+    const sf=(geom==="Helical coil")?spacingFactor(pitch,Do):1.0;
+    h_o = h_o_base*sf;
+
+    const R_i=(Do/Di)/(h_i+1e-30), R_w=Math.log(Do/Di)/(2.0*kWall), R_o=1.0/(h_o+1e-30);
+    Uo = 1.0/(R_i+R_w+R_o);
+
+    const {cp}=propsGas(gas,Tbulk,Pin), Cdot=mdot*cp;
+    const expo=((Tout - Tamb)/(Tin - Tamb));
+    const L = - (Cdot/(Uo*Math.PI*Do)) * Math.log(Math.max(expo,1e-12));
+
+    const Q_total=Cdot*(Tin-Tout);
+    const q_prime=Q_total/Math.max(L,1e-12);
+    const dT_o = q_prime*(1.0/((h_o+1e-30)*Math.PI*Do));
+    const Ts_new=Tamb + dT_o;
+
+    if (Math.abs(Ts_new - Ts_out) < tolTs){
+      return {L, Uo, h_i, h_o, Re, regime, Q_total, q_prime, iters: it+1};
+    }
+    Ts_out = 0.6*Ts_out + 0.4*Ts_new;
+    Tbulk = 0.5*(Tin+Tout);
+  }
+  return {L:0, Uo, h_i, h_o, Re, regime, Q_total:NaN, q_prime:NaN, iters:maxIter};
+}
+
+/* ===== pressure drop helpers ===== */
+function darcyFHaaland(Re, epsRel){ return 1.0/Math.pow(-1.8*Math.log10(Math.pow(epsRel/3.7,1.11)+6.9/Math.max(Re,1e-9)),2); }
+function dpDarcy(mdot, Di, L, rho, mu, epsRel, Kminor=0.0, fMult=1.0){
+  const A=0.25*Math.PI*Di*Di; const V=mdot/(A*rho+1e-30);
+  const Re=Math.max(rho*V*Di/(mu+1e-30),1e-9); const f=darcyFHaaland(Re,epsRel)*fMult;
+  const dp=(f*(L/Di)+Kminor)*0.5*rho*V*V; return {dp, Re, f, V};
+}
+
+/* ===== ΔP mode: solve mdot (bisection) & length ===== */
+function sizeFromDeltaP(base, dpTargetPa, Kminor=1.0, fMult=1.15, mdotLo=1e-6, mdotHi=0.1, maxIter=80, tolPa=50.0){
+  const {gas, Pin, Tin, Tout, Di}=base; const Tbulk=0.5*(Tin+Tout); const {rho,mu}=propsGas(gas,Tbulk,Pin);
+  function resid(mdot){
+    const thermo=requiredLength({...base, mdot}); const L=Math.max(thermo.L,1e-12);
+    const {dp, Re, f, V}=dpDarcy(mdot,Di,L,rho,mu,base.epsRel,Kminor,fMult);
+    return {r:dp-dpTargetPa, L, Re, f, V, thermo};
+  }
+  let rlo=resid(mdotLo).r, rhi=resid(mdotHi).r, expand=0;
+  while (rlo*rhi>0 && expand<12){ mdotHi*=2.0; rhi=resid(mdotHi).r; expand++; if (mdotHi>100) break; }
+  if (rlo*rhi>0) throw new Error("Failed to bracket mdot for ΔP. Adjust Kminor/f_mult/bounds.");
+  let md, mid;
+  for (let i=0;i<maxIter;i++){
+    md=0.5*(mdotLo+mdotHi); mid=resid(md);
+    if (Math.abs(mid.r)<tolPa) return {mdot:md, ...mid};
+    if (rlo*mid.r<0){ mdotHi=md; rhi=mid.r; } else { mdotLo=md; rlo=mid.r; }
+  }
+  return {mdot:md, ...mid};
+}
+
+/* ===== UI helpers ===== */
+function $(id){ return document.getElementById(id); }
+function stdTP(label){
+  if (label.includes("0 °C")) return {T:273.15, P:101325};
+  if (label.includes("25 °C")) return {T:298.15, P:101325};
+  return {T:293.15, P:101325}; // 20 °C
+}
+function kFromMaterialSelect(sel){ return parseFloat(sel.options[sel.selectedIndex].dataset.k); }
+function toggleGeometryUI(){
+  const geom=$("geom").value; const coilBlock=$("coilRows"); const coilOnly=document.querySelectorAll(".coilOnly");
+  if (geom==="Helical coil"){ coilBlock.classList.remove("hidden"); coilOnly.forEach(n=>n.classList.remove("hidden")); }
+  else { coilBlock.classList.add("hidden"); coilOnly.forEach(n=>n.classList.add("hidden")); }
+}
+
+/* ===== defaults & run ===== */
+function setDefaults(){
+  $("mode").value = "Given sccm → solve L";
+  $("geom").value = "Straight tube";
+  $("lenUnit").value = "mm";
+
+  $("gas").value = "Air";
+  $("Pkpa").value = 101.3;
+  $("epsrel").value = 1e-5;
+  $("sccm").value = 500;
+  $("std").value = "20 °C & 1 atm (NTP)";
+  $("Tin").value = 400;
+  $("Tout").value = 200;
+  $("Tamb").value = 25;
+
+  $("OD").value = 12.7;
+  $("wall").value = 1.1;
+  $("Dcoil").value = 250;
+  $("pitch").value = 15;
+
+  $("mat").value = "Stainless Steel (304/316)";
+  $("ext").value = "natural";
+  $("Uair").value = 0.0;
+  $("dP").value = 5.0;
+  $("Kminor").value = 1.0;
+  $("fmult").value = 1.15;
+
+  for (const id of ["L_required","wraps","coil_height","mdot","sccm_out","Uo","hi","ho","Re","fDarcy","V","Qtotal","qprime","iters"]){
+    $(id).textContent = "–";
+  }
+  toggleGeometryUI();
+}
+
+function fmt(x, unit=""){
+  if (!isFinite(x)) return "–";
+  let s; if (Math.abs(x)>=1000 || Math.abs(x)<0.001) s=x.toExponential(3); else s=x.toFixed(4);
+  return unit ? `${s} ${unit}` : s;
+}
+
+function run(){
+  try{
+    const mode=$("mode").value, geom=$("geom").value, unit=$("lenUnit").value;
+    const gas=$("gas").value, Pin=parseFloat($("Pkpa").value)*1000, epsRel=parseFloat($("epsrel").value);
+    const q_sccm=parseFloat($("sccm").value); const {T:Tstd,P:Pstd}=stdTP($("std").value);
+    const Tin=parseFloat($("Tin").value)+273.15, Tout=parseFloat($("Tout").value)+273.15, Tamb=parseFloat($("Tamb").value)+273.15;
+
+    const Do=toMeters(parseFloat($("OD").value),unit);
+    const wall=toMeters(parseFloat($("wall").value),unit);
+    const Di=Do-2*wall; if (!(Di>0)) throw new Error("Wall too thick (ID <= 0).");
+
+    let Dcoil_m=toMeters(parseFloat($("Dcoil").value||0),unit);
+    let pitch_m=toMeters(parseFloat($("pitch").value||0),unit);
+    if (geom==="Straight tube"){ Dcoil_m=0; pitch_m=0; }
+
+    const kWall=kFromMaterialSelect($("mat"));
+    const extMode=$("ext").value; const Uair=parseFloat($("Uair").value)||0;
+
+    const baseCommon={gas, Pin, Tin, Tout, Tamb, Do, Di, kWall, epsRel, geom, Dcoil:Dcoil_m, pitch:pitch_m, extMode, Uair};
+
+    let mdot, out, L, Re_dp=NaN, f_dp=NaN, V_dp=NaN, sccmDisp=q_sccm;
+
+    if (mode.startsWith("Given sccm")){
+      mdot=sccmToKgPerS(q_sccm,gas,Tstd,Pstd);
+      out=requiredLength({...baseCommon, mdot}); L=out.L;
+      const Tbulk=0.5*(Tin+Tout); const {rho,mu}=propsGas(gas,Tbulk,Pin);
+      const dpInfo=dpDarcy(mdot,Di,L,rho,mu,epsRel,0.0,1.0);
+      Re_dp=dpInfo.Re; f_dp=dpInfo.f; V_dp=dpInfo.V;
+    } else {
+      const dp_kPa=parseFloat($("dP").value); const Kminor=parseFloat($("Kminor").value)||0;
+      const fmult=(geom==="Helical coil") ? (parseFloat($("fmult").value)||1.0) : 1.0;
+      const mdGuess=Math.max(sccmToKgPerS(Math.max(q_sccm,1),gas,Tstd,Pstd),1e-6);
+      const res=sizeFromDeltaP(baseCommon, dp_kPa*1000, Kminor, fmult, mdGuess/20, mdGuess*20, 80, 50.0);
+      mdot=res.mdot; L=res.L; out=res.thermo; Re_dp=res.Re; f_dp=res.f; V_dp=res.V;
+      sccmDisp=kgPerSToSccm(mdot,gas,Tstd,Pstd);
+    }
+
+    $("L_required").textContent = fmtLen(L, unit);
+
+    if (geom==="Helical coil"){
+      const LperTurn=Math.sqrt(Math.pow(Math.PI*(Dcoil_m||1),2)+Math.pow(pitch_m||1,2));
+      const wraps=L/(LperTurn>0?LperTurn:1e9); const coilH=wraps*(pitch_m||0);
+      $("wraps").textContent=isFinite(wraps)?wraps.toFixed(2):"–";
+      $("coil_height").textContent=fmtLen(coilH, unit);
+    } else {
+      $("wraps").textContent="–"; $("coil_height").textContent="–";
+    }
+
+    $("mdot").textContent=fmt(mdot,"kg/s");
+    $("sccm_out").textContent=isFinite(sccmDisp)?sccmDisp.toFixed(1)+" sccm":"–";
+    $("Uo").textContent=fmt(out.Uo,"W/m²·K");
+    $("hi").textContent=fmt(out.h_i,"W/m²·K");
+    $("ho").textContent=fmt(out.h_o,"W/m²·K");
+    $("Re").textContent=isFinite(Re_dp)?Re_dp.toFixed(0):(isFinite(out.Re)?out.Re.toFixed(0):"–");
+    $("fDarcy").textContent=isFinite(f_dp)?f_dp.toFixed(4):"–";
+    $("V").textContent=isFinite(V_dp)?V_dp.toFixed(3)+" m/s":"–";
+    $("Qtotal").textContent=fmt(out.Q_total,"W");
+    $("qprime").textContent=fmt(out.q_prime,"W/m");
+    $("iters").textContent=out.iters ?? "–";
+
+  } catch(err){ alert("Error: " + err.message); }
+}
+
+$("runBtn").addEventListener("click", run);
+$("defaultsBtn").addEventListener("click", setDefaults);
+$("geom").addEventListener("change", toggleGeometryUI);
+setDefaults();
+</script>
+</body>
+</html>
