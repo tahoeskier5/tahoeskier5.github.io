@@ -7,38 +7,32 @@
   <script src="https://cdn.plot.ly/plotly-2.35.2.min.js"></script>
   <style>
     :root {
-      --bg: #0f1220;
-      --panel: #171b2f;
-      --panel2: #11162a;
-      --text: #e9edf5;
-      --muted: #a4adbd;
-      --border: #2c3353;
-      --accent: #6ea8fe;
-      --green: #29c58d;
-      --yellow: #f2c94c;
-      --red: #ff6b6b;
-      --shadow: rgba(0,0,0,.3);
+      --bg: #f6f7fb;
+      --panel: #ffffff;
+      --panel2: #f0f3f8;
+      --text: #182033;
+      --muted: #667085;
+      --border: #d8dee8;
+      --accent: #2563eb;
+      --accent2: #0f766e;
+      --danger: #b42318;
+      --shadow: rgba(16, 24, 40, 0.08);
     }
 
     * { box-sizing: border-box; }
 
     body {
       margin: 0;
-      background:
-        radial-gradient(circle at 10% 0%, rgba(110,168,254,.18), transparent 30%),
-        radial-gradient(circle at 90% 0%, rgba(41,197,141,.14), transparent 28%),
-        var(--bg);
+      background: var(--bg);
       color: var(--text);
-      font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+      font-family: Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
       line-height: 1.45;
     }
 
-    a { color: inherit; }
-
     .wrap {
-      max-width: 1440px;
+      max-width: 1400px;
       margin: 0 auto;
-      padding: 24px 16px 50px;
+      padding: 24px 16px 48px;
     }
 
     header {
@@ -46,127 +40,128 @@
       justify-content: space-between;
       align-items: flex-start;
       gap: 16px;
-      margin-bottom: 24px;
+      margin-bottom: 20px;
     }
 
     h1 {
       margin: 0;
-      font-size: clamp(30px, 5vw, 52px);
-      letter-spacing: -1.4px;
-      line-height: 1.02;
+      font-size: clamp(30px, 4vw, 48px);
+      line-height: 1.05;
+      letter-spacing: -1.2px;
     }
 
     .subtitle {
+      max-width: 920px;
       margin: 10px 0 0;
       color: var(--muted);
-      max-width: 900px;
-      font-size: 17px;
+      font-size: 16px;
     }
 
     .back {
-      color: var(--muted);
       text-decoration: none;
+      color: var(--text);
       border: 1px solid var(--border);
-      padding: 8px 12px;
+      background: var(--panel);
       border-radius: 999px;
-      background: rgba(17,22,42,.7);
+      padding: 8px 12px;
       white-space: nowrap;
+      box-shadow: 0 6px 16px var(--shadow);
     }
 
     .layout {
       display: grid;
-      grid-template-columns: 380px 1fr;
+      grid-template-columns: 360px 1fr;
       gap: 18px;
       align-items: start;
     }
 
     .card {
-      background: linear-gradient(180deg, rgba(23,27,47,.98), rgba(17,22,42,.98));
+      background: var(--panel);
       border: 1px solid var(--border);
-      border-radius: 18px;
+      border-radius: 16px;
       padding: 18px;
-      box-shadow: 0 16px 34px var(--shadow);
+      box-shadow: 0 10px 28px var(--shadow);
     }
 
-    .sticky { position: sticky; top: 16px; }
+    .sticky {
+      position: sticky;
+      top: 16px;
+    }
 
-    .card h2 {
+    h2 {
       margin: 0 0 14px;
       font-size: 20px;
     }
 
-    .card h3 {
-      margin: 20px 0 10px;
-      font-size: 15px;
-      color: #d7def0;
-      text-transform: uppercase;
+    h3 {
+      margin: 20px 0 8px;
+      color: #344054;
+      font-size: 13px;
       letter-spacing: .08em;
+      text-transform: uppercase;
     }
 
     label {
       display: block;
       margin: 12px 0 5px;
-      color: #d6ddeb;
-      font-weight: 650;
       font-size: 14px;
-    }
-
-    .hint {
-      color: var(--muted);
-      font-size: 12px;
-      margin-top: 3px;
+      font-weight: 700;
+      color: #344054;
     }
 
     input[type="number"] {
       width: 100%;
-      background: #0d1224;
-      color: var(--text);
       border: 1px solid var(--border);
-      border-radius: 11px;
+      border-radius: 10px;
       padding: 10px 11px;
+      color: var(--text);
+      background: #fff;
       font-size: 15px;
       outline: none;
     }
 
     input[type="number"]:focus {
       border-color: var(--accent);
-      box-shadow: 0 0 0 3px rgba(110,168,254,.13);
+      box-shadow: 0 0 0 3px rgba(37, 99, 235, .12);
     }
 
-    .checkbox-row {
-      display: flex;
+    .hint {
+      margin-top: 4px;
+      color: var(--muted);
+      font-size: 12px;
+    }
+
+    .row {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
       gap: 10px;
-      align-items: flex-start;
-      margin-top: 14px;
-      padding: 12px;
-      background: rgba(13,18,36,.55);
-      border: 1px solid var(--border);
-      border-radius: 12px;
     }
-
-    .checkbox-row input { margin-top: 3px; }
-    .checkbox-row label { margin: 0; }
 
     button {
+      width: 100%;
+      margin-top: 18px;
       border: 0;
-      background: linear-gradient(135deg, var(--accent), var(--green));
-      color: #061120;
-      font-weight: 900;
-      font-size: 15px;
+      border-radius: 11px;
       padding: 12px 14px;
-      border-radius: 12px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 15px;
+      font-weight: 800;
       cursor: pointer;
     }
 
-    .primary-button { width: 100%; margin-top: 18px; }
-
     .secondary-button {
-      background: rgba(13,18,36,.9);
+      width: auto;
+      margin-top: 0;
+      background: #fff;
       color: var(--text);
       border: 1px solid var(--border);
     }
 
-    .results { display: grid; gap: 18px; }
+    .results {
+      display: grid;
+      gap: 18px;
+    }
 
     .metrics {
       display: grid;
@@ -175,40 +170,46 @@
     }
 
     .metric {
-      background: rgba(13,18,36,.74);
       border: 1px solid var(--border);
-      border-radius: 15px;
+      border-radius: 14px;
       padding: 14px;
-      min-height: 96px;
+      background: linear-gradient(180deg, #fff, #f8fafc);
+      min-height: 100px;
     }
 
     .metric .label {
+      margin-bottom: 7px;
       color: var(--muted);
       font-size: 12px;
-      margin-bottom: 6px;
+      font-weight: 700;
     }
 
     .metric .value {
       font-size: 21px;
       font-weight: 900;
-      letter-spacing: -.4px;
+      letter-spacing: -.3px;
     }
 
     .metric .sub {
+      margin-top: 5px;
       color: var(--muted);
       font-size: 12px;
-      margin-top: 4px;
+    }
+
+    .note {
+      margin: 0;
+      color: var(--muted);
+      font-size: 13px;
     }
 
     .plot {
       width: 100%;
-      min-height: 520px;
-      background: rgba(13,18,36,.45);
+      min-height: 620px;
       border: 1px solid var(--border);
-      border-radius: 15px;
+      border-radius: 14px;
+      overflow: hidden;
+      background: #fff;
     }
-
-    .plot.tall { min-height: 700px; }
 
     .summary-grid {
       display: grid;
@@ -221,68 +222,55 @@
       color: var(--muted);
     }
 
-    .summary-grid strong { color: var(--text); }
+    .summary-grid strong {
+      color: var(--text);
+    }
 
     .table-tools {
       display: flex;
       justify-content: space-between;
       align-items: center;
       gap: 12px;
-      margin-bottom: 12px;
       flex-wrap: wrap;
+      margin-bottom: 12px;
     }
 
     .table-wrap {
-      overflow-x: auto;
       border: 1px solid var(--border);
       border-radius: 14px;
-      max-height: 620px;
-      overflow-y: auto;
+      overflow: auto;
+      max-height: 560px;
+      background: #fff;
     }
 
     table {
       width: 100%;
       border-collapse: collapse;
-      min-width: 1800px;
+      min-width: 1500px;
     }
 
     th, td {
-      border-bottom: 1px solid var(--border);
       padding: 9px 8px;
+      border-bottom: 1px solid var(--border);
       text-align: right;
       white-space: nowrap;
       font-size: 13px;
     }
 
-    th:first-child,
-    td:first-child { text-align: left; }
+    th:first-child, td:first-child { text-align: left; }
 
     th {
       position: sticky;
       top: 0;
       z-index: 1;
-      color: #d9e1f2;
-      background: #11162a;
-    }
-
-    td { color: #eef2fb; }
-
-    .small {
-      font-size: 12px;
-      color: var(--muted);
+      background: #f8fafc;
+      color: #344054;
     }
 
     .caption {
-      font-size: 13px;
-      color: var(--muted);
       margin-top: 12px;
-    }
-
-    code {
-      color: #c7d2ff;
-      background: rgba(13,18,36,.7);
-      padding: 2px 4px;
-      border-radius: 5px;
+      color: var(--muted);
+      font-size: 13px;
     }
 
     @media (max-width: 1050px) {
@@ -295,7 +283,8 @@
 
     @media (max-width: 560px) {
       .metrics { grid-template-columns: 1fr; }
-      .plot, .plot.tall { min-height: 420px; }
+      .row { grid-template-columns: 1fr; }
+      .plot { min-height: 480px; }
     }
   </style>
 </head>
@@ -305,7 +294,7 @@
       <div>
         <h1>Dental Practice Buy-In Calculator</h1>
         <p class="subtitle">
-          Reinvest positive monthly cash flow back into the loan and treat the ownership stake as a positive asset that grows with CAGR.
+          Model a practice ownership buy-in where ownership distributions are retained by the practice/lender and applied to the principal loan balance until the loan is paid off. After payoff, distributions are paid out as owner cash flow.
         </p>
       </div>
       <a class="back" href="../">← Back to tools</a>
@@ -315,122 +304,93 @@
       <aside class="card sticky">
         <h2>Inputs</h2>
 
-        <label for="practice_valuation">Practice valuation ($)</label>
-        <input id="practice_valuation" type="number" min="0" value="9285714" step="50000" />
+        <h3>Ownership buy-in</h3>
+        <label for="practiceValuation">Practice valuation ($)</label>
+        <input id="practiceValuation" type="number" min="0" value="9285714" step="50000" />
 
-        <label for="ownership_pct">Ownership percentage (%)</label>
-        <input id="ownership_pct" type="number" min="0" max="100" value="7" step="0.1" />
+        <label for="ownershipPct">Ownership percentage (%)</label>
+        <input id="ownershipPct" type="number" min="0" max="100" value="7" step="0.1" />
 
-        <label for="annual_practice_profit">Current annual practice profit ($)</label>
-        <input id="annual_practice_profit" type="number" min="0" value="1500000" step="25000" />
-        <div class="hint">Example: $10M annual production × 15% profit margin = $1.5M annual profit.</div>
+        <label for="sweatEquityCredit">Sweat equity credit ($)</label>
+        <input id="sweatEquityCredit" type="number" min="0" value="0" step="10000" />
+        <div class="hint">Credit applied against the ownership value before financing is calculated.</div>
 
-        <label for="sweat_equity_amount">Sweat equity credit ($)</label>
-        <input id="sweat_equity_amount" type="number" min="0" value="0" step="10000" />
-        <div class="hint">Dollar credit applied against the ownership buy-in before calculating cash down and financing.</div>
+        <label for="financedPct">Percent financed (%)</label>
+        <input id="financedPct" type="number" min="0" max="100" value="100" step="1" />
 
-        <label for="financed_pct">Percent financed (%)</label>
-        <input id="financed_pct" type="number" min="0" max="100" value="100" step="1" />
-
-        <label for="annual_interest_rate_pct">Internal financing interest rate (%)</label>
-        <input id="annual_interest_rate_pct" type="number" min="0" value="4.08" step="0.01" />
-
-        <label for="loan_years">Loan term (years)</label>
-        <input id="loan_years" type="number" min="0.1" value="5" step="0.5" />
-
-        <label for="cagr_pct">Practice value and profit CAGR (%)</label>
-        <input id="cagr_pct" type="number" min="-100" value="10.4" step="0.1" />
-        <div class="hint">This grows both annual profit/distributions and estimated practice value.</div>
-
-        <label for="projection_months">Projection length (months)</label>
-        <input id="projection_months" type="number" min="1" value="120" step="12" />
-
-        <div class="checkbox-row">
-          <input id="reinvest_positive_cash_flow" type="checkbox" checked />
+        <h3>Financing</h3>
+        <div class="row">
           <div>
-            <label for="reinvest_positive_cash_flow">Sweep positive monthly cash flow back into loan</label>
-            <div class="hint">When checked, any distribution remaining after the scheduled loan payment is paid toward principal.</div>
+            <label for="interestRate">Interest rate (%)</label>
+            <input id="interestRate" type="number" min="0" value="4.08" step="0.01" />
+          </div>
+          <div>
+            <label for="loanYears">Loan term (years)</label>
+            <input id="loanYears" type="number" min="0.1" value="5" step="0.5" />
           </div>
         </div>
 
-        <button class="primary-button" onclick="calculateAndRender()">Calculate</button>
-        <p class="small">This model is for planning only. It is not tax, legal, or financial advice.</p>
+        <h3>Practice growth</h3>
+        <label for="annualPracticeProfit">Current annual practice profit ($)</label>
+        <input id="annualPracticeProfit" type="number" min="0" value="1500000" step="25000" />
+        <div class="hint">Monthly ownership distribution = annual profit × ownership percentage ÷ 12.</div>
+
+        <div class="row">
+          <div>
+            <label for="cagrPct">CAGR (%)</label>
+            <input id="cagrPct" type="number" min="-100" value="10.4" step="0.1" />
+          </div>
+          <div>
+            <label for="projectionMonths">Projection months</label>
+            <input id="projectionMonths" type="number" min="1" value="120" step="12" />
+          </div>
+        </div>
+
+        <button onclick="calculateAndRender()">Calculate</button>
       </aside>
 
       <main class="results">
         <section class="card">
           <div class="metrics">
-            <div class="metric">
-              <div class="label">Current ownership value</div>
-              <div id="metric_original_ownership_value" class="value">$0</div>
-            </div>
-            <div class="metric">
-              <div class="label">Financed amount</div>
-              <div id="metric_financed_amount" class="value">$0</div>
-            </div>
-            <div class="metric">
-              <div class="label">Scheduled monthly payment</div>
-              <div id="metric_scheduled_monthly_payment" class="value">$0</div>
-            </div>
-            <div class="metric">
-              <div class="label">Debt-adjusted break-even month</div>
-              <div id="metric_debt_adjusted_break_even_month" class="value">Not reached</div>
-            </div>
-            <div class="metric">
-              <div class="label">Loan paid off month</div>
-              <div id="metric_loan_paid_off_month" class="value">Not paid off</div>
-            </div>
-            <div class="metric">
-              <div class="label">Final ownership value</div>
-              <div id="metric_final_ownership_value" class="value">$0</div>
-            </div>
-            <div class="metric">
-              <div class="label">Total interest paid</div>
-              <div id="metric_total_interest_paid" class="value">$0</div>
-            </div>
-            <div class="metric">
-              <div class="label">Final total position</div>
-              <div id="metric_final_total_position" class="value">$0</div>
-            </div>
+            <div class="metric"><div class="label">Ownership value today</div><div id="ownershipValue" class="value">$0</div><div class="sub">Valuation × ownership</div></div>
+            <div class="metric"><div class="label">Net buy-in</div><div id="netBuyIn" class="value">$0</div><div class="sub">After sweat equity</div></div>
+            <div class="metric"><div class="label">Financed amount</div><div id="financedAmount" class="value">$0</div><div class="sub">Loan principal at month 0</div></div>
+            <div class="metric"><div class="label">Scheduled payment</div><div id="scheduledPayment" class="value">$0</div><div class="sub">Fixed monthly payment</div></div>
+            <div class="metric"><div class="label">Loan paid off month</div><div id="loanPaidOffMonth" class="value">-</div><div class="sub">With retained distributions</div></div>
+            <div class="metric"><div class="label">Final ownership value</div><div id="finalOwnershipValue" class="value">$0</div><div class="sub">Positive equity value</div></div>
+            <div class="metric"><div class="label">Total interest paid</div><div id="totalInterestPaid" class="value">$0</div><div class="sub">During projection</div></div>
+            <div class="metric"><div class="label">Final total position</div><div id="finalTotalPosition" class="value">$0</div><div class="sub">Equity + cash kept − cash paid</div></div>
           </div>
         </section>
 
         <section class="card">
-          <h2>Economic Position Over Time</h2>
-          <div id="economic_plot" class="plot tall"></div>
-        </section>
-
-        <section class="card">
-          <h2>Monthly Cash Flow Detail</h2>
-          <div id="monthly_plot" class="plot"></div>
+          <h2>Projection chart</h2>
+          <p class="note">Hover over the chart to see loan balance, ownership value, retained distribution to principal, cash paid out after payoff, and total position for each month.</p>
+          <div id="mainPlot" class="plot"></div>
         </section>
 
         <section class="card">
           <h2>Summary</h2>
           <div class="summary-grid">
-            <div id="summary_col_1"></div>
-            <div id="summary_col_2"></div>
-            <div id="summary_col_3"></div>
+            <div id="summary1"></div>
+            <div id="summary2"></div>
+            <div id="summary3"></div>
           </div>
         </section>
 
         <section class="card">
           <div class="table-tools">
-            <h2>Projection Table</h2>
-            <button class="secondary-button" onclick="downloadCsv()">Download projection as CSV</button>
+            <h2>Projection table</h2>
+            <button class="secondary-button" onclick="downloadCsv()">Download CSV</button>
           </div>
           <div class="table-wrap">
             <table>
-              <thead id="projection_head"></thead>
-              <tbody id="projection_body"></tbody>
+              <thead id="tableHead"></thead>
+              <tbody id="tableBody"></tbody>
             </table>
           </div>
           <p class="caption">
-            Model notes: Practice value and annual profit both grow by the CAGR input. Ownership value = practice value × ownership percentage.
-            Net buy-in = original ownership value − sweat equity credit. Positive monthly cash flow is calculated after the scheduled loan payment.
-            When the sweep option is enabled, positive monthly cash flow is immediately applied as extra principal until the loan is paid off.
-            Debt-adjusted position excluding equity = cumulative distributions − cumulative payments − remaining loan balance.
-            Total position including equity = debt-adjusted position excluding equity + current estimated ownership value.
+            Distribution treatment: while a loan balance remains, the ownership distribution is not paid out. It is applied directly to principal after the scheduled loan payment. Once the loan is paid off, future monthly distributions are paid out as cash kept.
           </p>
         </section>
       </main>
@@ -439,157 +399,139 @@
 
   <script>
     let latestRows = [];
-    let latestSummary = {};
 
     function money(value) {
       const x = Number.isFinite(value) ? value : 0;
-      return x.toLocaleString("en-US", {
-        style: "currency",
-        currency: "USD",
-        maximumFractionDigits: 0
-      });
+      return x.toLocaleString("en-US", { style: "currency", currency: "USD", maximumFractionDigits: 0 });
     }
 
     function readNumber(id) {
       return parseFloat(document.getElementById(id).value) || 0;
     }
 
-    function monthlyPayment(principal, annualInterestRate, months) {
+    function monthlyPayment(principal, annualRate, months) {
       if (principal <= 0 || months <= 0) return 0;
-      const monthlyRate = annualInterestRate / 12;
-      if (monthlyRate === 0) return principal / months;
-      return principal * (
-        monthlyRate * Math.pow(1 + monthlyRate, months)
-      ) / (Math.pow(1 + monthlyRate, months) - 1);
+      const r = annualRate / 12;
+      if (r === 0) return principal / months;
+      return principal * (r * Math.pow(1 + r, months)) / (Math.pow(1 + r, months) - 1);
     }
 
     function buildProjection(inputs) {
       const ownershipDecimal = inputs.ownershipPct / 100;
       const financedDecimal = inputs.financedPct / 100;
-      const annualInterestRate = inputs.annualInterestRatePct / 100;
-      const cagrDecimal = inputs.cagrPct / 100;
+      const annualRate = inputs.interestRate / 100;
+      const cagr = inputs.cagrPct / 100;
+      const monthlyGrowth = Math.pow(1 + cagr, 1 / 12) - 1;
 
       const originalOwnershipValue = inputs.practiceValuation * ownershipDecimal;
-      const sweatEquityAmount = Math.max(0, Math.min(inputs.sweatEquityAmount, originalOwnershipValue));
-      const netBuyInAmount = originalOwnershipValue - sweatEquityAmount;
-      const financedAmount = netBuyInAmount * financedDecimal;
-      const cashDown = netBuyInAmount - financedAmount;
+      const sweatEquityCredit = Math.max(0, Math.min(inputs.sweatEquityCredit, originalOwnershipValue));
+      const netBuyIn = originalOwnershipValue - sweatEquityCredit;
+      const financedAmount = netBuyIn * financedDecimal;
+      const cashDown = netBuyIn - financedAmount;
       const loanMonths = Math.round(inputs.loanYears * 12);
-      const scheduledPayment = monthlyPayment(financedAmount, annualInterestRate, loanMonths);
-      const monthlyGrowthRate = Math.pow(1 + cagrDecimal, 1 / 12) - 1;
+      const scheduledPayment = monthlyPayment(financedAmount, annualRate, loanMonths);
 
-      let remainingLoan = financedAmount;
-      let cumulativeDistributions = 0;
-      let cumulativePayments = cashDown;
-      let cumulativeSweptCashFlow = 0;
-      let cumulativeCashKept = -cashDown;
+      let balance = financedAmount;
+      let cumulativeScheduledPayments = cashDown;
+      let cumulativeDistributionsEarned = 0;
+      let cumulativeDistributionsAppliedToPrincipal = 0;
+      let cumulativeCashPaidOut = -cashDown;
+      let cumulativeInterest = 0;
+      let payoffMonth = null;
+
       const rows = [];
 
       for (let month = 0; month <= inputs.projectionMonths; month++) {
-        const growthFactor = Math.pow(1 + monthlyGrowthRate, month);
+        const growthFactor = Math.pow(1 + monthlyGrowth, month);
         const practiceValue = inputs.practiceValuation * growthFactor;
         const ownershipValue = practiceValue * ownershipDecimal;
-        const annualProfit = inputs.annualPracticeProfit * growthFactor;
-        const monthlyDistribution = (annualProfit / 12) * ownershipDecimal;
+        const annualPracticeProfit = inputs.annualPracticeProfit * growthFactor;
+        const ownershipDistribution = (annualPracticeProfit * ownershipDecimal) / 12;
 
         let interestPaid = 0;
         let scheduledPrincipalPaid = 0;
         let scheduledPaymentThisMonth = 0;
-        let sweptCashFlowToLoan = 0;
-        let cashKeptThisMonth = 0;
+        let distributionAppliedToPrincipal = 0;
+        let cashPaidOutThisMonth = 0;
+        let beginningLoanBalance = balance;
 
         if (month > 0) {
-          cumulativeDistributions += monthlyDistribution;
+          cumulativeDistributionsEarned += ownershipDistribution;
 
-          if (remainingLoan > 0) {
-            interestPaid = remainingLoan * (annualInterestRate / 12);
-            scheduledPrincipalPaid = Math.min(scheduledPayment - interestPaid, remainingLoan);
-            scheduledPaymentThisMonth = scheduledPrincipalPaid + interestPaid;
+          if (balance > 0) {
+            interestPaid = balance * (annualRate / 12);
+            scheduledPaymentThisMonth = Math.min(scheduledPayment, balance + interestPaid);
+            scheduledPrincipalPaid = Math.max(0, Math.min(scheduledPaymentThisMonth - interestPaid, balance));
+            balance = Math.max(0, balance - scheduledPrincipalPaid);
+            cumulativeScheduledPayments += scheduledPaymentThisMonth;
+            cumulativeInterest += interestPaid;
 
-            remainingLoan -= scheduledPrincipalPaid;
-            remainingLoan = Math.max(remainingLoan, 0);
-            cumulativePayments += scheduledPaymentThisMonth;
+            if (balance > 0) {
+              distributionAppliedToPrincipal = Math.min(ownershipDistribution, balance);
+              balance = Math.max(0, balance - distributionAppliedToPrincipal);
+              cumulativeDistributionsAppliedToPrincipal += distributionAppliedToPrincipal;
+            }
 
-            const cashFlowAfterScheduledPayment = monthlyDistribution - scheduledPaymentThisMonth;
-
-            if (inputs.reinvestPositiveCashFlow && cashFlowAfterScheduledPayment > 0 && remainingLoan > 0) {
-              sweptCashFlowToLoan = Math.min(cashFlowAfterScheduledPayment, remainingLoan);
-              remainingLoan -= sweptCashFlowToLoan;
-              remainingLoan = Math.max(remainingLoan, 0);
-              cumulativePayments += sweptCashFlowToLoan;
-              cumulativeSweptCashFlow += sweptCashFlowToLoan;
-              cashKeptThisMonth = cashFlowAfterScheduledPayment - sweptCashFlowToLoan;
-            } else {
-              cashKeptThisMonth = cashFlowAfterScheduledPayment;
+            if (balance <= 0.01 && payoffMonth === null) {
+              balance = 0;
+              payoffMonth = month;
             }
           } else {
-            cashKeptThisMonth = monthlyDistribution;
+            cashPaidOutThisMonth = ownershipDistribution;
+            cumulativeCashPaidOut += cashPaidOutThisMonth;
           }
-
-          cumulativeCashKept += cashKeptThisMonth;
         }
 
-        const cashFlowAfterScheduledPayment = month > 0
-          ? monthlyDistribution - scheduledPaymentThisMonth
-          : -cashDown;
-
-        const netCashPosition = cumulativeDistributions - cumulativePayments;
-        const debtAdjustedPositionExcludingEquity = netCashPosition - remainingLoan;
-        const totalPositionIncludingEquity = debtAdjustedPositionExcludingEquity + ownershipValue;
+        const debtAdjustedCashPosition = cumulativeCashPaidOut - cumulativeScheduledPayments;
+        const totalPositionIncludingEquity = ownershipValue + cumulativeCashPaidOut - cumulativeScheduledPayments - balance;
 
         rows.push({
           "Month": month,
           "Practice Value": practiceValue,
           "Ownership Value": ownershipValue,
-          "Practice Profit Annualized": annualProfit,
-          "Monthly Distribution": monthlyDistribution,
-          "Original Ownership Value": originalOwnershipValue,
-          "Sweat Equity Credit": sweatEquityAmount,
-          "Net Buy-In After Sweat Equity": netBuyInAmount,
-          "Remaining Loan Balance": remainingLoan,
-          "Cumulative Payments": cumulativePayments,
-          "Cumulative Distributions": cumulativeDistributions,
-          "Cash Flow After Scheduled Payment": cashFlowAfterScheduledPayment,
-          "Cash Flow Swept to Loan": sweptCashFlowToLoan,
-          "Cash Kept This Month": month > 0 ? cashKeptThisMonth : -cashDown,
-          "Cumulative Cash Kept": cumulativeCashKept,
-          "Net Cash Position": netCashPosition,
-          "Debt-Adjusted Position Excluding Equity": debtAdjustedPositionExcludingEquity,
-          "Total Position Including Equity": totalPositionIncludingEquity,
-          "Interest Paid This Month": interestPaid,
-          "Scheduled Principal Paid This Month": scheduledPrincipalPaid,
-          "Scheduled Loan Payment This Month": scheduledPaymentThisMonth,
-          "Total Payment This Month": scheduledPaymentThisMonth + sweptCashFlowToLoan
+          "Annual Practice Profit": annualPracticeProfit,
+          "Ownership Distribution Earned": month > 0 ? ownershipDistribution : 0,
+          "Beginning Loan Balance": beginningLoanBalance,
+          "Interest Paid": interestPaid,
+          "Scheduled Payment": scheduledPaymentThisMonth,
+          "Scheduled Principal Paid": scheduledPrincipalPaid,
+          "Distribution Applied To Principal": distributionAppliedToPrincipal,
+          "Cash Paid Out To Owner": cashPaidOutThisMonth,
+          "Ending Loan Balance": balance,
+          "Cumulative Scheduled Payments": cumulativeScheduledPayments,
+          "Cumulative Distributions Earned": cumulativeDistributionsEarned,
+          "Cumulative Distributions Applied To Principal": cumulativeDistributionsAppliedToPrincipal,
+          "Cumulative Cash Paid Out": cumulativeCashPaidOut,
+          "Debt Adjusted Cash Position": debtAdjustedCashPosition,
+          "Total Position Including Equity": totalPositionIncludingEquity
         });
       }
 
-      const debtAdjustedBreakEvenRow = rows.find(row => row["Debt-Adjusted Position Excluding Equity"] > 0);
-      const totalBreakEvenRow = rows.find(row => row["Total Position Including Equity"] > 0);
-      const loanPaidOffRow = rows.find(row => row["Remaining Loan Balance"] <= 0.01);
       const finalRow = rows[rows.length - 1];
+      const debtAdjustedBreakEvenRow = rows.find(r => r["Debt Adjusted Cash Position"] > 0);
+      const totalBreakEvenRow = rows.find(r => r["Total Position Including Equity"] > 0);
 
       const summary = {
         originalOwnershipValue,
-        sweatEquityAmount,
-        netBuyInAmount,
+        sweatEquityCredit,
+        netBuyIn,
         financedAmount,
         cashDown,
-        scheduledMonthlyPayment: scheduledPayment,
         loanMonths,
-        loanPaidOffMonth: loanPaidOffRow ? loanPaidOffRow["Month"] : null,
+        scheduledPayment,
+        payoffMonth,
         debtAdjustedBreakEvenMonth: debtAdjustedBreakEvenRow ? debtAdjustedBreakEvenRow["Month"] : null,
         totalBreakEvenMonth: totalBreakEvenRow ? totalBreakEvenRow["Month"] : null,
-        finalNetCashPosition: finalRow["Net Cash Position"],
-        finalDebtAdjustedPositionExcludingEquity: finalRow["Debt-Adjusted Position Excluding Equity"],
-        finalTotalPositionIncludingEquity: finalRow["Total Position Including Equity"],
-        finalCumulativeDistributions: finalRow["Cumulative Distributions"],
-        finalCumulativePayments: finalRow["Cumulative Payments"],
-        finalRemainingLoanBalance: finalRow["Remaining Loan Balance"],
         finalPracticeValue: finalRow["Practice Value"],
         finalOwnershipValue: finalRow["Ownership Value"],
-        cumulativeSweptCashFlow,
-        totalInterestPaid: rows.reduce((sum, row) => sum + row["Interest Paid This Month"], 0),
-        finalCumulativeCashKept: finalRow["Cumulative Cash Kept"]
+        finalLoanBalance: finalRow["Ending Loan Balance"],
+        cumulativeInterest,
+        cumulativeScheduledPayments,
+        cumulativeDistributionsEarned,
+        cumulativeDistributionsAppliedToPrincipal,
+        cumulativeCashPaidOut,
+        finalDebtAdjustedCashPosition: finalRow["Debt Adjusted Cash Position"],
+        finalTotalPositionIncludingEquity: finalRow["Total Position Including Equity"]
       };
 
       return { rows, summary };
@@ -597,159 +539,173 @@
 
     function getInputs() {
       return {
-        practiceValuation: readNumber("practice_valuation"),
-        ownershipPct: readNumber("ownership_pct"),
-        annualPracticeProfit: readNumber("annual_practice_profit"),
-        sweatEquityAmount: readNumber("sweat_equity_amount"),
-        financedPct: readNumber("financed_pct"),
-        annualInterestRatePct: readNumber("annual_interest_rate_pct"),
-        loanYears: readNumber("loan_years"),
-        cagrPct: readNumber("cagr_pct"),
-        projectionMonths: Math.round(readNumber("projection_months")),
-        reinvestPositiveCashFlow: document.getElementById("reinvest_positive_cash_flow").checked
+        practiceValuation: readNumber("practiceValuation"),
+        ownershipPct: readNumber("ownershipPct"),
+        sweatEquityCredit: readNumber("sweatEquityCredit"),
+        financedPct: readNumber("financedPct"),
+        interestRate: readNumber("interestRate"),
+        loanYears: readNumber("loanYears"),
+        annualPracticeProfit: readNumber("annualPracticeProfit"),
+        cagrPct: readNumber("cagrPct"),
+        projectionMonths: Math.round(readNumber("projectionMonths"))
       };
     }
 
     function renderMetrics(summary) {
-      document.getElementById("metric_original_ownership_value").textContent = money(summary.originalOwnershipValue);
-      document.getElementById("metric_financed_amount").textContent = money(summary.financedAmount);
-      document.getElementById("metric_scheduled_monthly_payment").textContent = money(summary.scheduledMonthlyPayment);
-      document.getElementById("metric_debt_adjusted_break_even_month").textContent = summary.debtAdjustedBreakEvenMonth === null ? "Not reached" : summary.debtAdjustedBreakEvenMonth;
-      document.getElementById("metric_loan_paid_off_month").textContent = summary.loanPaidOffMonth === null ? "Not paid off" : summary.loanPaidOffMonth;
-      document.getElementById("metric_final_ownership_value").textContent = money(summary.finalOwnershipValue);
-      document.getElementById("metric_total_interest_paid").textContent = money(summary.totalInterestPaid);
-      document.getElementById("metric_final_total_position").textContent = money(summary.finalTotalPositionIncludingEquity);
+      document.getElementById("ownershipValue").textContent = money(summary.originalOwnershipValue);
+      document.getElementById("netBuyIn").textContent = money(summary.netBuyIn);
+      document.getElementById("financedAmount").textContent = money(summary.financedAmount);
+      document.getElementById("scheduledPayment").textContent = money(summary.scheduledPayment);
+      document.getElementById("loanPaidOffMonth").textContent = summary.payoffMonth === null ? "Not paid" : summary.payoffMonth;
+      document.getElementById("finalOwnershipValue").textContent = money(summary.finalOwnershipValue);
+      document.getElementById("totalInterestPaid").textContent = money(summary.cumulativeInterest);
+      document.getElementById("finalTotalPosition").textContent = money(summary.finalTotalPositionIncludingEquity);
     }
 
-    function renderPlots(rows) {
-      const months = rows.map(row => row["Month"]);
+    function renderPlot(rows) {
+      const months = rows.map(r => r["Month"]);
+      const custom = rows.map(r => [
+        r["Beginning Loan Balance"],
+        r["Ending Loan Balance"],
+        r["Ownership Distribution Earned"],
+        r["Distribution Applied To Principal"],
+        r["Cash Paid Out To Owner"],
+        r["Interest Paid"],
+        r["Scheduled Payment"],
+        r["Total Position Including Equity"]
+      ]);
 
-      const commonLayout = {
-        paper_bgcolor: "rgba(0,0,0,0)",
-        plot_bgcolor: "rgba(0,0,0,0)",
-        font: { color: "#e9edf5" },
-        margin: { l: 70, r: 25, t: 25, b: 55 },
+      const hover =
+        "<b>Month %{x}</b><br>" +
+        "Beginning balance: %{customdata[0]:$,.0f}<br>" +
+        "Ending balance: %{customdata[1]:$,.0f}<br>" +
+        "Distribution earned: %{customdata[2]:$,.0f}<br>" +
+        "Distribution to principal: %{customdata[3]:$,.0f}<br>" +
+        "Cash paid out: %{customdata[4]:$,.0f}<br>" +
+        "Interest paid: %{customdata[5]:$,.0f}<br>" +
+        "Scheduled payment: %{customdata[6]:$,.0f}<br>" +
+        "Total position: %{customdata[7]:$,.0f}<extra></extra>";
+
+      const traces = [
+        {
+          x: months,
+          y: rows.map(r => r["Ending Loan Balance"]),
+          name: "Loan balance",
+          type: "scatter",
+          mode: "lines",
+          line: { width: 4 },
+          customdata: custom,
+          hovertemplate: hover
+        },
+        {
+          x: months,
+          y: rows.map(r => r["Ownership Value"]),
+          name: "Ownership value",
+          type: "scatter",
+          mode: "lines",
+          line: { width: 4 },
+          customdata: custom,
+          hovertemplate: hover
+        },
+        {
+          x: months,
+          y: rows.map(r => r["Total Position Including Equity"]),
+          name: "Total position including equity",
+          type: "scatter",
+          mode: "lines",
+          line: { width: 4, dash: "dash" },
+          customdata: custom,
+          hovertemplate: hover
+        },
+        {
+          x: months,
+          y: rows.map(r => r["Distribution Applied To Principal"]),
+          name: "Distribution to principal",
+          type: "bar",
+          opacity: 0.28,
+          yaxis: "y2",
+          customdata: custom,
+          hovertemplate: hover
+        },
+        {
+          x: months,
+          y: rows.map(r => r["Cash Paid Out To Owner"]),
+          name: "Cash paid out after payoff",
+          type: "bar",
+          opacity: 0.28,
+          yaxis: "y2",
+          customdata: custom,
+          hovertemplate: hover
+        }
+      ];
+
+      const layout = {
+        paper_bgcolor: "#ffffff",
+        plot_bgcolor: "#ffffff",
+        font: { color: "#182033" },
+        margin: { l: 78, r: 78, t: 28, b: 62 },
         hovermode: "x unified",
+        barmode: "group",
+        legend: { orientation: "h", yanchor: "bottom", y: 1.02, xanchor: "left", x: 0 },
         xaxis: {
-          title: "Time (months)",
-          gridcolor: "rgba(255,255,255,.10)",
-          zerolinecolor: "rgba(255,255,255,.25)"
+          title: "Month",
+          gridcolor: "rgba(102,112,133,.18)",
+          zerolinecolor: "rgba(102,112,133,.28)"
         },
         yaxis: {
-          title: "Dollars ($)",
+          title: "Balance / value / position ($)",
           tickprefix: "$",
           separatethousands: true,
-          gridcolor: "rgba(255,255,255,.10)",
-          zerolinecolor: "rgba(255,255,255,.25)"
+          gridcolor: "rgba(102,112,133,.18)",
+          zerolinecolor: "rgba(102,112,133,.35)"
         },
-        legend: { orientation: "h", yanchor: "bottom", y: 1.02, xanchor: "left", x: 0 }
+        yaxis2: {
+          title: "Monthly distribution use ($)",
+          tickprefix: "$",
+          separatethousands: true,
+          overlaying: "y",
+          side: "right",
+          showgrid: false
+        },
+        shapes: [{ type: "line", xref: "paper", x0: 0, x1: 1, yref: "y", y0: 0, y1: 0, line: { color: "rgba(102,112,133,.5)", dash: "dash", width: 1 } }]
       };
 
-      const economicData = [
-        { name: "Ownership Value", y: rows.map(row => row["Ownership Value"]), mode: "lines", line: { width: 3 } },
-        { name: "Remaining Loan Balance", y: rows.map(row => row["Remaining Loan Balance"]), mode: "lines" },
-        { name: "Cumulative Payments", y: rows.map(row => row["Cumulative Payments"]), mode: "lines" },
-        { name: "Cumulative Distributions", y: rows.map(row => row["Cumulative Distributions"]), mode: "lines" },
-        { name: "Net Cash Position", y: rows.map(row => row["Net Cash Position"]), mode: "lines" },
-        { name: "Debt-Adjusted Position Excluding Equity", y: rows.map(row => row["Debt-Adjusted Position Excluding Equity"]), mode: "lines", line: { width: 3, dash: "dash" } },
-        { name: "Total Position Including Equity", y: rows.map(row => row["Total Position Including Equity"]), mode: "lines", line: { width: 4 } }
-      ].map(trace => ({ ...trace, x: months, type: "scatter" }));
-
-      Plotly.react("economic_plot", economicData, {
-        ...commonLayout,
-        height: 700,
-        shapes: [{
-          type: "line", xref: "paper", x0: 0, x1: 1, yref: "y", y0: 0, y1: 0,
-          line: { color: "rgba(255,255,255,.55)", dash: "dash", width: 1 }
-        }]
-      }, { responsive: true, displaylogo: false });
-
-      const monthlyData = [
-        { name: "Monthly Distribution", y: rows.map(row => row["Monthly Distribution"]), mode: "lines" },
-        { name: "Scheduled Loan Payment", y: rows.map(row => row["Scheduled Loan Payment This Month"]), mode: "lines" },
-        { name: "Cash Flow Swept to Loan", y: rows.map(row => row["Cash Flow Swept to Loan"]), mode: "lines" },
-        { name: "Cash Kept This Month", y: rows.map(row => row["Cash Kept This Month"]), mode: "lines" }
-      ].map(trace => ({ ...trace, x: months, type: "scatter" }));
-
-      Plotly.react("monthly_plot", monthlyData, {
-        ...commonLayout,
-        height: 500,
-        yaxis: { ...commonLayout.yaxis, title: "Monthly Dollars ($)" },
-        shapes: [{
-          type: "line", xref: "paper", x0: 0, x1: 1, yref: "y", y0: 0, y1: 0,
-          line: { color: "rgba(255,255,255,.55)", dash: "dash", width: 1 }
-        }]
-      }, { responsive: true, displaylogo: false });
+      Plotly.react("mainPlot", traces, layout, { responsive: true, displaylogo: false });
     }
 
     function renderSummary(inputs, summary) {
-      document.getElementById("summary_col_1").innerHTML = `
-        <p>Current practice value: <strong>${money(inputs.practiceValuation)}</strong></p>
+      document.getElementById("summary1").innerHTML = `
+        <p>Practice value today: <strong>${money(inputs.practiceValuation)}</strong></p>
         <p>Projected final practice value: <strong>${money(summary.finalPracticeValue)}</strong></p>
-        <p>Current ownership value: <strong>${money(summary.originalOwnershipValue)}</strong></p>
-        <p>Projected final ownership value: <strong>${money(summary.finalOwnershipValue)}</strong></p>
-        <p>Sweat equity credit: <strong>${money(summary.sweatEquityAmount)}</strong></p>
-        <p>Net buy-in after sweat equity: <strong>${money(summary.netBuyInAmount)}</strong></p>
+        <p>Ownership purchased: <strong>${inputs.ownershipPct.toFixed(1)}%</strong></p>
+        <p>Ownership value today: <strong>${money(summary.originalOwnershipValue)}</strong></p>
+        <p>Final ownership value: <strong>${money(summary.finalOwnershipValue)}</strong></p>
       `;
 
-      document.getElementById("summary_col_2").innerHTML = `
+      document.getElementById("summary2").innerHTML = `
+        <p>Sweat equity credit: <strong>${money(summary.sweatEquityCredit)}</strong></p>
+        <p>Net buy-in after sweat equity: <strong>${money(summary.netBuyIn)}</strong></p>
         <p>Cash down: <strong>${money(summary.cashDown)}</strong></p>
+        <p>Financed amount: <strong>${money(summary.financedAmount)}</strong></p>
         <p>Loan term: <strong>${summary.loanMonths} months</strong></p>
-        <p>Loan paid off month: <strong>${summary.loanPaidOffMonth === null ? "Not paid off" : summary.loanPaidOffMonth}</strong></p>
-        <p>Final cumulative distributions: <strong>${money(summary.finalCumulativeDistributions)}</strong></p>
-        <p>Final cumulative payments: <strong>${money(summary.finalCumulativePayments)}</strong></p>
-        <p>Cash flow swept to loan: <strong>${money(summary.cumulativeSweptCashFlow)}</strong></p>
-        <p>Total interest paid: <strong>${money(summary.totalInterestPaid)}</strong></p>
+        <p>Loan paid off month: <strong>${summary.payoffMonth === null ? "Not paid" : summary.payoffMonth}</strong></p>
       `;
 
-      document.getElementById("summary_col_3").innerHTML = `
-        <p>Debt-adjusted break-even month: <strong>${summary.debtAdjustedBreakEvenMonth === null ? "Not reached" : summary.debtAdjustedBreakEvenMonth}</strong></p>
-        <p>Total-position break-even month: <strong>${summary.totalBreakEvenMonth === null ? "Not reached" : summary.totalBreakEvenMonth}</strong></p>
-        <p>Final cash position: <strong>${money(summary.finalNetCashPosition)}</strong></p>
-        <p>Final debt-adjusted position excluding equity: <strong>${money(summary.finalDebtAdjustedPositionExcludingEquity)}</strong></p>
+      document.getElementById("summary3").innerHTML = `
+        <p>Cumulative distributions earned: <strong>${money(summary.cumulativeDistributionsEarned)}</strong></p>
+        <p>Distributions applied to principal: <strong>${money(summary.cumulativeDistributionsAppliedToPrincipal)}</strong></p>
+        <p>Cash paid out after payoff: <strong>${money(summary.cumulativeCashPaidOut)}</strong></p>
+        <p>Total scheduled payments/cash down: <strong>${money(summary.cumulativeScheduledPayments)}</strong></p>
+        <p>Total interest paid: <strong>${money(summary.cumulativeInterest)}</strong></p>
         <p>Final total position including equity: <strong>${money(summary.finalTotalPositionIncludingEquity)}</strong></p>
-        <p>Final cumulative cash kept: <strong>${money(summary.finalCumulativeCashKept)}</strong></p>
       `;
     }
 
     function renderTable(rows) {
-      const columns = [
-        "Month",
-        "Practice Value",
-        "Ownership Value",
-        "Practice Profit Annualized",
-        "Monthly Distribution",
-        "Original Ownership Value",
-        "Sweat Equity Credit",
-        "Net Buy-In After Sweat Equity",
-        "Remaining Loan Balance",
-        "Cumulative Payments",
-        "Cumulative Distributions",
-        "Cash Flow After Scheduled Payment",
-        "Cash Flow Swept to Loan",
-        "Cash Kept This Month",
-        "Cumulative Cash Kept",
-        "Net Cash Position",
-        "Debt-Adjusted Position Excluding Equity",
-        "Total Position Including Equity",
-        "Interest Paid This Month",
-        "Scheduled Principal Paid This Month",
-        "Scheduled Loan Payment This Month",
-        "Total Payment This Month"
-      ];
-
-      document.getElementById("projection_head").innerHTML = `
-        <tr>${columns.map(col => `<th>${col}</th>`).join("")}</tr>
-      `;
-
-      document.getElementById("projection_body").innerHTML = rows.map(row => `
-        <tr>
-          ${columns.map(col => {
-            const value = row[col];
-            const display = col === "Month" ? value : money(value);
-            return `<td>${display}</td>`;
-          }).join("")}
-        </tr>
+      const cols = Object.keys(rows[0]);
+      document.getElementById("tableHead").innerHTML = `<tr>${cols.map(c => `<th>${c}</th>`).join("")}</tr>`;
+      document.getElementById("tableBody").innerHTML = rows.map(row => `
+        <tr>${cols.map(c => `<td>${c === "Month" ? row[c] : money(row[c])}</td>`).join("")}</tr>
       `).join("");
     }
 
@@ -757,49 +713,34 @@
       const inputs = getInputs();
       const { rows, summary } = buildProjection(inputs);
       latestRows = rows;
-      latestSummary = summary;
       renderMetrics(summary);
-      renderPlots(rows);
+      renderPlot(rows);
       renderSummary(inputs, summary);
       renderTable(rows);
     }
 
     function csvEscape(value) {
-      const str = String(value ?? "");
-      if (str.includes(",") || str.includes('"') || str.includes("\n")) {
-        return '"' + str.replaceAll('"', '""') + '"';
-      }
-      return str;
+      const s = String(value ?? "");
+      return /[",\n]/.test(s) ? '"' + s.replaceAll('"', '""') + '"' : s;
     }
 
     function downloadCsv() {
       if (!latestRows.length) return;
-      const columns = Object.keys(latestRows[0]);
-      const csv = [
-        columns.map(csvEscape).join(","),
-        ...latestRows.map(row => columns.map(col => csvEscape(row[col])).join(","))
-      ].join("\n");
-
+      const cols = Object.keys(latestRows[0]);
+      const csv = [cols.map(csvEscape).join(","), ...latestRows.map(row => cols.map(c => csvEscape(row[c])).join(","))].join("\n");
       const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      a.download = "dental_buy_in_reinvested_cash_flow_with_equity_projection.csv";
+      a.download = "dental_buy_in_projection.csv";
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
     }
 
-    document.querySelectorAll("input").forEach(input => {
-      input.addEventListener("change", calculateAndRender);
-    });
-
-    window.addEventListener("resize", () => {
-      Plotly.Plots.resize("economic_plot");
-      Plotly.Plots.resize("monthly_plot");
-    });
-
+    document.querySelectorAll("input").forEach(el => el.addEventListener("change", calculateAndRender));
+    window.addEventListener("resize", () => Plotly.Plots.resize("mainPlot"));
     calculateAndRender();
   </script>
 </body>
