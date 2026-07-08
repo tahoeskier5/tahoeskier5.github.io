@@ -615,7 +615,7 @@
 
     function renderPlot(rows) {
       const months = rows.map(r => r["Month"]);
-      const hoverMoney = "%{y:$,.0f}<extra></extra>";
+      const hoverTemplate = (label) => `<b>${label}</b><br>Month %{x}<br>%{y:$,.0f}<extra></extra>`;
 
       const traces = [
         {
@@ -625,7 +625,7 @@
           type: "scatter",
           mode: "lines",
           line: { width: 4 },
-          hovertemplate: hoverMoney
+          hovertemplate: hoverTemplate("Loan balance")
         },
         {
           x: months,
@@ -634,7 +634,7 @@
           type: "scatter",
           mode: "lines",
           line: { width: 4 },
-          hovertemplate: hoverMoney
+          hovertemplate: hoverTemplate("Ownership value")
         },
         {
           x: months,
@@ -643,16 +643,16 @@
           type: "scatter",
           mode: "lines",
           line: { width: 4, dash: "dash" },
-          hovertemplate: hoverMoney
+          hovertemplate: hoverTemplate("Total position")
         },
         {
           x: months,
           y: rows.map(r => r["Distribution Applied To Principal"]),
-          name: "Distribution → principal",
+          name: "Distribution to principal",
           type: "bar",
           opacity: 0.28,
           yaxis: "y2",
-          hovertemplate: hoverMoney
+          hovertemplate: hoverTemplate("Distribution to principal")
         },
         {
           x: months,
@@ -661,7 +661,7 @@
           type: "bar",
           opacity: 0.28,
           yaxis: "y2",
-          hovertemplate: hoverMoney
+          hovertemplate: hoverTemplate("Cash paid out")
         }
       ];
 
@@ -674,16 +674,16 @@
         plot_bgcolor: "#ffffff",
         font: { color: "#182033", size: isNarrow ? 10 : 12 },
         margin: isNarrow ? { l: 48, r: 8, t: 46, b: 42 } : { l: 64, r: 48, t: 38, b: 48 },
-        hovermode: "x unified",
-        hoverdistance: 25,
-        spikedistance: 25,
+        hovermode: "closest",
+        hoverdistance: 12,
+        spikedistance: -1,
         barmode: "group",
         hoverlabel: {
           bgcolor: "#111827",
           bordercolor: "#111827",
           font: { color: "#ffffff", size: 12, family: "Inter, system-ui, sans-serif" },
           align: "left",
-          namelength: 18
+          namelength: -1
         },
         legend: {
           orientation: "h",
@@ -696,9 +696,7 @@
         xaxis: {
           title: "Month",
           automargin: true,
-          showspikes: true,
-          spikemode: "across",
-          spikesnap: "cursor",
+          showspikes: false,
           gridcolor: "rgba(102,112,133,.18)",
           zerolinecolor: "rgba(102,112,133,.28)"
         },
