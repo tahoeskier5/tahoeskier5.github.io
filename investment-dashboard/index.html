@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Investment Dashboard</title>
+  <style>
+    :root {
+      --bg: #0f172a;
+      --panel: #111827;
+      --panel-2: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #374151;
+      --good: #22c55e;
+      --bad: #ef4444;
+      --warn: #f59e0b;
+      --accent: #38bdf8;
+      --shadow: rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      font-family: Arial, sans-serif;
+      background: radial-gradient(circle at top left, #1e3a8a 0, var(--bg) 36%);
+      color: var(--text);
+      min-height: 100vh;
+    }
+
+    .container {
+      width: min(1400px, 96vw);
+      margin: 0 auto;
+      padding: 24px 0 48px;
+    }
+
+    .header {
+      display: flex;
+      justify-content: space-between;
+      gap: 16px;
+      align-items: flex-start;
+      margin-bottom: 20px;
+    }
+
+    h1 {
+      margin: 0 0 8px;
+      font-size: clamp(1.8rem, 3vw, 3rem);
+    }
+
+    .subtitle {
+      color: var(--muted);
+      max-width: 850px;
+      line-height: 1.45;
+    }
+
+    .back-link {
+      color: var(--accent);
+      text-decoration: none;
+      white-space: nowrap;
+      margin-top: 8px;
+    }
+
+    .panel {
+      background: rgba(17, 24, 39, 0.92);
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      padding: 18px;
+      box-shadow: 0 12px 30px var(--shadow);
+      margin-bottom: 18px;
+    }
+
+    .upload-box {
+      border: 2px dashed #475569;
+      border-radius: 16px;
+      padding: 24px;
+      text-align: center;
+      background: rgba(15, 23, 42, 0.7);
+      transition: 0.15s;
+    }
+
+    .upload-box.dragover {
+      border-color: var(--accent);
+      background: rgba(14, 165, 233, 0.12);
+    }
+
+    input[type="file"] {
+      display: none;
+    }
+
+    .button {
+      display: inline-block;
+      border: 1px solid #0ea5e9;
+      background: #0284c7;
+      color: white;
+      border-radius: 999px;
+      padding: 10px 16px;
+      cursor: pointer;
+      font-weight: 700;
+      margin-top: 12px;
+    }
+
+    .button.secondary {
+      background: transparent;
+      color: var(--accent);
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 12px;
+      align-items: end;
+      margin-top: 16px;
+    }
+
+    .control {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      min-width: 170px;
+    }
+
+    label {
+      color: var(--muted);
+      font-size: 0.86rem;
+    }
+
+    input[type="number"], input[type="text"] {
+      background: #020617;
+      color: var(--text);
+      border: 1px solid var(--border);
+      border-radius: 10px;
+      padding: 9px 10px;
+    }
+
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(4, minmax(170px, 1fr));
+      gap: 14px;
+    }
+
+    .card {
+      background: linear-gradient(180deg, var(--panel-2), #111827);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 16px;
+      min-height: 108px;
+    }
+
+    .card-title {
+      color: var(--muted);
+      font-size: 0.84rem;
+      margin-bottom: 8px;
+    }
+
+    .card-value {
+      font-size: 1.55rem;
+      font-weight: 800;
+      word-break: break-word;
+    }
+
+    .card-note {
+      color: var(--muted);
+      margin-top: 8px;
+      font-size: 0.84rem;
+      line-height: 1.35;
+    }
+
+    .good {
+      color: var(--good);
+    }
+
+    .bad {
+      color: var(--bad);
+    }
+
+    .warn {
+      color: var(--warn);
+    }
+
+    .table-wrap {
+      overflow-x: auto;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      min-width: 950px;
+      background: #020617;
+    }
+
+    th, td {
+      padding: 11px 12px;
+      border-bottom: 1px solid #1f2937;
+      text-align: left;
+      vertical-align: top;
+      font-size: 0.92rem;
+    }
+
+    th {
+      position: sticky;
+      top: 0;
+      background: #111827;
+      color: #cbd5e1;
+      cursor: pointer;
+      user-select: none;
+      white-space: nowrap;
+    }
+
+    tr:hover td {
+      background: rgba(56, 189, 248, 0.06);
+    }
+
+    .pill {
+      display: inline-block;
+      padding: 4px 8px;
+      border-radius: 999px;
+      font-size: 0.78rem;
+      font-weight: 700;
+      border: 1px solid var(--border);
+      white-space: nowrap;
+    }
+
+    .pill.good {
+      background: rgba(34, 197, 94, 0.12);
+      border-color: rgba(34, 197, 94, 0.35);
+    }
+
+    .pill.bad {
+      background: rgba(239, 68, 68, 0.12);
+      border-color: rgba(239, 68, 68, 0.35);
+    }
+
+    .pill.warn {
+      background: rgba(245, 158, 11, 0.12);
+      border-color: rgba(245, 158, 11, 0.35);
+    }
+
+    .section-title {
+      display: flex;
+      justify-content: space-between;
+      gap: 12px;
+      align-items: center;
+      margin-bottom: 12px;
+    }
+
+    h2 {
+      margin: 0;
+      font-size: 1.25rem;
+    }
+
+    .small {
+      color: var(--muted);
+      font-size: 0.86rem;
+      line-height: 1.4;
+    }
+
+    .empty {
+      color: var(--muted);
+      padding: 14px;
+    }
+
+    .bar {
+      height: 9px;
+      background: #1e293b;
+      border-radius: 999px;
+      overflow: hidden;
+      margin-top: 8px;
+    }
+
+    .bar-fill {
+      height: 100%;
+      background: linear-gradient(90deg, #ef4444, #f59e0b, #22c55e);
+      width: 0%;
+    }
+
+    .footer-note {
+      color: var(--muted);
+      font-size: 0.83rem;
+      line-height: 1.45;
+      margin-top: 14px;
+    }
+
+    @media (max-width: 950px) {
+      .grid {
+        grid-template-columns: repeat(2, 1fr);
+      }
+
+      .header {
+        flex-direction: column;
+      }
+    }
+
+    @media (max-width: 600px) {
+      .grid {
+        grid-template-columns: 1fr;
+      }
+
+      .panel {
+        padding: 14px;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <div class="header">
+      <div>
+        <h1>Investment Dashboard</h1>
+        <div class="subtitle">
+          Upload a CSV of your holdings to summarize value, cost basis, gains/losses,
+          concentration risk, investment quality, and possible tax-loss harvesting candidates.
+          Everything runs locally in your browser.
+        </div>
+      </div>
+      <a class="back-link" href="/">← Landing Page</a>
+    </div>
+
+    <div class="panel">
+      <div id="dropZone" class="upload-box">
+        <strong>Drop your investments CSV here</strong>
+        <div class="small" style="margin-top: 8px;">
+          Recommended columns: Account, Account Type, Ticker, Name, Shares, Cost Basis,
+          Market Value, Current Price, Purchase Date.
+        </div>
+        <label class="button" for="csvFile">Choose CSV</label>
+        <input id="csvFile" type="file" accept=".csv,text/csv" />
+      </div>
+
+      <div class="controls">
+        <div class="control">
+          <label for="lossDollarThreshold">Harvest loss threshold $</label>
+          <input id="lossDollarThreshold" type="number" value="500" min="0" step="50" />
+        </div>
+
+        <div class="control">
+          <label for="lossPercentThreshold">Harvest loss threshold %</label>
+          <input id="lossPercentThreshold" type="number" value="5" min="0" step="1" />
+        </div>
+
+        <div class="control">
+          <label for="taxableKeywords">Taxable account keywords</label>
+          <input id="taxableKeywords" type="text" value="taxable, brokerage, individual, trust" />
+        </div>
+
+        <button id="exportBtn" class="button secondary" type="button" disabled>Export Summary CSV</button>
+      </div>
+
+      <div class="footer-note">
+        Rating is a rough screen, not financial advice. Static GitHub Pages cannot securely pull live market data
+        unless you add a backend. You can manually tune ticker ratings inside the JavaScript.
+      </div>
+    </div>
+
+    <div id="summaryGrid" class="grid" style="display:none;"></div>
+
+    <div id="warningsPanel" class="panel" style="display:none;">
+      <div class="section-title">
+        <h2>Data Notes</h2>
+      </div>
+      <div id="warnings" class="small"></div>
+    </div>
+
+    <div id="harvestPanel" class="panel" style="display:none;">
+      <div class="section-title">
+        <h2>Tax-Loss Harvesting Candidates</h2>
+        <div class="small">Taxable accounts only. Check wash-sale rules manually before selling.</div>
+      </div>
+      <div id="harvestTable" class="table-wrap"></div>
+    </div>
+
+    <div id="holdingsPanel" class="panel" style="display:none;">
+      <div class="section-title">
+        <h2>Holdings</h2>
+        <div class="small">Click table headers to sort.</div>
+      </div>
+      <div id="holdingsTable" class="table-wrap"></div>
+    </div>
+  </div>
+
+  <script>
+    // ------------------------------------------------------------
+    // Optional manual rating overrides.
+    // Adjust these however you want.
+    // quality: 0-100, valuation: 0-100, risk: 0-100 where higher risk lowers score.
+    // ------------------------------------------------------------
+    const RATING_OVERRIDES = {
+      "VTI":  { quality: 90, valuation: 75, risk: 20, note: "Broad US market ETF. Strong core holding." },
+      "VOO":  { quality: 90, valuation: 73, risk: 20, note: "S&P 500 ETF. Strong core holding." },
+      "VT":   { quality: 88, valuation: 75, risk: 18, note: "Global stock ETF. Very diversified." },
+      "VXUS": { quality: 82, valuation: 78, risk: 25, note: "International ETF. Useful diversifier." },
+      "BND":  { quality: 80, valuation: 70, risk: 18, note: "Bond ETF. Stabilizer, not a growth engine." },
+      "MSFT": { quality: 92, valuation: 60, risk: 28, note: "Excellent business quality, but valuation matters." },
+      "GOOG": { quality: 90, valuation: 68, risk: 30, note: "High-quality business. Watch concentration." },
+      "GOOGL": { quality: 90, valuation: 68, risk: 30, note: "High-quality business. Watch concentration." },
+      "IBM":  { quality: 62, valuation: 65, risk: 45, note: "Mature tech business. Lower growth profile." },
+      "BEPC": { quality: 58, valuation: 63, risk: 55, note: "Renewable infrastructure exposure. Rate-sensitive." },
+      "NBIS": { quality: 35, valuation: 45, risk: 78, note: "Speculative/high-volatility holding." }
+    };
+
+    let holdings = [];
+    let currentSort = { key: "marketValue", direction: "desc" };
+
+    const fileInput = document.getElementById("csvFile");
+    const dropZone = document.getElementById("dropZone");
+    const summaryGrid = document.getElementById("summaryGrid");
+    const holdingsPanel = document.getElementById("holdingsPanel");
+    const harvestPanel = document.getElementById("harvestPanel");
+    const warningsPanel = document.getElementById("warningsPanel");
+    const warningsEl = document.getElementById("warnings");
+    const exportBtn = document.getElementById("exportBtn");
+
+    document.getElementById("lossDollarThreshold").addEventListener("input", renderAll);
+    document.getElementById("lossPercentThreshold").addEventListener("input", renderAll);
+    document.getElementById("taxableKeywords").addEventListener("input", renderAll);
+
+    fileInput.addEventListener("change", e => {
+      const file = e.target.files[0];
+      if (file) readCSV(file);
+    });
+
+    dropZone.addEventListener("dragover", e => {
+      e.preventDefault();
+      dropZone.classList.add("dragover");
+    });
+
+    dropZone.addEventListener("dragleave", () => {
+      dropZone.classList.remove("dragover");
+    });
+
+    dropZone.addEventListener("drop", e => {
+      e.preventDefault();
+      dropZone.classList.remove("dragover");
+      const file = e.dataTransfer.files[0];
+      if (file) readCSV(file);
+    });
+
+    exportBtn.addEventListener("click", exportSummaryCSV);
+
+    function readCSV(file) {
+      const reader = new FileReader();
+      reader.onload = e => {
+        try {
+          const rows = parseCSV(e.target.result);
+          holdings = normalizeRows(rows);
+          renderAll();
+        } catch (err) {
+          alert("Could not parse CSV: " + err.message);
+        }
+      };
+      reader.readAsText(file);
+    }
+
+    function parseCSV(text) {
+      const rows = [];
+      let row = [];
+      let cell = "";
+      let inQuotes = false;
+
+      for (let i = 0; i < text.length; i++) {
+        const char = text[i];
+        const next = text[i + 1];
+
+        if (char === '"' && inQuotes && next === '"') {
+          cell += '"';
+          i++;
+        } else if (char === '"') {
+          inQuotes = !inQuotes;
+        } else if (char === "," && !inQuotes) {
+          row.push(cell);
+          cell = "";
+        } else if ((char === "\n" || char === "\r") && !inQuotes) {
+          if (char === "\r" && next === "\n") i++;
+          row.push(cell);
+          if (row.some(v => v.trim() !== "")) rows.push(row);
+          row = [];
+          cell = "";
+        } else {
+          cell += char;
+        }
+      }
+
+      if (cell || row.length) {
+        row.push(cell);
+        if (row.some(v => v.trim() !== "")) rows.push(row);
+      }
+
+      if (rows.length < 2) {
+        throw new Error("CSV needs a header row and at least one data row.");
+      }
+
+      const headers = rows[0].map(h => h.trim());
+      return rows.slice(1).map(r => {
+        const obj = {};
+        headers.forEach((h, i) => obj[h] = (r[i] || "").trim());
+        return obj;
+      });
+    }
+
+    function normalizeRows(rows) {
+      const warnings = [];
+      const mapped = rows.map((row, index) => {
+        const ticker = getField(row, [
+          "ticker", "symbol", "security symbol", "holding symbol"
+        ]).toUpperCase();
+
+        const name = getField(row, [
+          "name", "description", "security name", "holding", "investment", "fund name"
+        ]);
+
+        const account = getField(row, [
+          "account", "account name", "registration"
+        ]);
+
+        const accountType = getField(row, [
+          "account type", "type", "tax status", "taxable"
+        ]);
+
+        const shares = parseNumber(getField(row, [
+          "shares", "quantity", "qty", "units"
+        ]));
+
+        const costBasis = parseNumber(getField(row, [
+          "cost basis", "total cost basis", "basis", "cost", "book value"
+        ]));
+
+        const marketValue = parseNumber(getField(row, [
+          "market value", "current value", "value", "balance", "total value"
+        ]));
+
+        const currentPrice = parseNumber(getField(row, [
+          "current price", "price", "last price", "market price"
+        ]));
+
+        const purchaseDateRaw = getField(row, [
+          "purchase date", "acquired date", "acquisition date", "date acquired"
+        ]);
+
+        let effectiveMarketValue = marketValue;
+        if (!effectiveMarketValue && shares && currentPrice) {
+          effectiveMarketValue = shares * currentPrice;
+        }
+
+        const gainLoss = effectiveMarketValue - costBasis;
+        const gainLossPct = costBasis > 0 ? gainLoss / costBasis : 0;
+
+        if (!ticker && !name) warnings.push(`Row ${index + 2}: missing ticker/name.`);
+        if (!effectiveMarketValue) warnings.push(`Row ${index + 2}: missing market value.`);
+        if (!costBasis) warnings.push(`Row ${index + 2}: missing cost basis.`);
+
+        return {
+          raw: row,
+          ticker: ticker || "N/A",
+          name: name || ticker || "Unknown",
+          account,
+          accountType,
+          shares,
+          costBasis,
+          marketValue: effectiveMarketValue,
+          currentPrice,
+          gainLoss,
+          gainLossPct,
+          purchaseDateRaw,
+          purchaseDate: parseDate(purchaseDateRaw)
+        };
+      });
+
+      mapped._warnings = [...new Set(warnings)].slice(0, 20);
+      return mapped.filter(h => h.marketValue || h.costBasis || h.ticker !== "N/A");
+    }
+
+    function getField(row, candidates) {
+      const keys = Object.keys(row);
+      for (const candidate of candidates) {
+        const match = keys.find(k => cleanKey(k) === cleanKey(candidate));
+        if (match) return row[match] || "";
+      }
+      return "";
+    }
+
+    function cleanKey(key) {
+      return String(key).toLowerCase().replace(/[^a-z0-9]/g, "");
+    }
+
+    function parseNumber(value) {
+      if (value === null || value === undefined) return 0;
+      const cleaned = String(value)
+        .replace(/\$/g, "")
+        .replace(/,/g, "")
+        .replace(/%/g, "")
+        .replace(/\((.*)\)/, "-$1")
+        .trim();
+
+      const n = Number(cleaned);
+      return Number.isFinite(n) ? n : 0;
+    }
+
+    function parseDate(value) {
+      if (!value) return null;
+      const d = new Date(value);
+      return Number.isNaN(d.getTime()) ? null : d;
+    }
+
+    function renderAll() {
+      if (!holdings.length) return;
+
+      holdings.forEach(h => {
+        h.weight = h.marketValue / totalMarketValue();
+        const rating = rateHolding(h);
+        h.rating = rating.score;
+        h.ratingLabel = rating.label;
+        h.ratingNote = rating.note;
+        h.harvest = harvestStatus(h);
+      });
+
+      renderSummary();
+      renderWarnings();
+      renderHarvest();
+      renderHoldings();
+
+      summaryGrid.style.display = "grid";
+      holdingsPanel.style.display = "block";
+      harvestPanel.style.display = "block";
+      exportBtn.disabled = false;
+    }
+
+    function totalMarketValue() {
+      return holdings.reduce((sum, h) => sum + h.marketValue, 0);
+    }
+
+    function totalCostBasis() {
+      return holdings.reduce((sum, h) => sum + h.costBasis, 0);
+    }
+
+    function renderSummary() {
+      const totalValue = totalMarketValue();
+      const basis = totalCostBasis();
+      const gainLoss = totalValue - basis;
+      const gainLossPct = basis > 0 ? gainLoss / basis : 0;
+
+      const candidates = holdings.filter(h => h.harvest.isCandidate);
+      const harvestLoss = candidates.reduce((sum, h) => sum + h.gainLoss, 0);
+      const maxWeight = Math.max(...holdings.map(h => h.weight || 0));
+      const avgRating = weightedAverage(holdings, "rating", "marketValue");
+
+      summaryGrid.innerHTML = `
+        ${summaryCard("Portfolio Value", money(totalValue), `${holdings.length} holdings`)}
+        ${summaryCard("Cost Basis", money(basis), "Based on CSV data")}
+        ${summaryCard("Unrealized Gain/Loss", signedMoney(gainLoss), percent(gainLossPct), gainLoss >= 0 ? "good" : "bad")}
+        ${summaryCard("Weighted Rating", `${Math.round(avgRating)} / 100`, ratingText(avgRating))}
+        ${summaryCard("Largest Position", percent(maxWeight), concentrationText(maxWeight), maxWeight > 0.25 ? "warn" : "")}
+        ${summaryCard("Harvest Candidates", String(candidates.length), `${signedMoney(harvestLoss)} possible losses`, candidates.length ? "warn" : "good")}
+        ${summaryCard("Taxable Value", money(taxableValue()), "Detected by account keywords")}
+        ${summaryCard("Retirement Value", money(totalValue - taxableValue()), "IRA/401k/HSA etc. excluded from harvesting")}
+      `;
+    }
+
+    function summaryCard(title, value, note, valueClass = "") {
+      return `
+        <div class="card">
+          <div class="card-title">${escapeHTML(title)}</div>
+          <div class="card-value ${valueClass}">${escapeHTML(value)}</div>
+          <div class="card-note">${escapeHTML(note || "")}</div>
+        </div>
+      `;
+    }
+
+    function renderWarnings() {
+      const warnings = holdings._warnings || [];
+      if (!warnings.length) {
+        warningsPanel.style.display = "none";
+        return;
+      }
+
+      warningsPanel.style.display = "block";
+      warningsEl.innerHTML = warnings.map(w => `<div>• ${escapeHTML(w)}</div>`).join("");
+    }
+
+    function renderHarvest() {
+      const candidates = holdings
+        .filter(h => h.harvest.isCandidate)
+        .sort((a, b) => a.gainLoss - b.gainLoss);
+
+      if (!candidates.length) {
+        document.getElementById("harvestTable").innerHTML =
+          `<div class="empty">No clear tax-loss harvesting candidates based on the current thresholds.</div>`;
+        return;
+      }
+
+      document.getElementById("harvestTable").innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              <th>Ticker</th>
+              <th>Name</th>
+              <th>Account</th>
+              <th>Market Value</th>
+              <th>Cost Basis</th>
+              <th>Loss</th>
+              <th>Loss %</th>
+              <th>Wash-Sale Note</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${candidates.map(h => `
+              <tr>
+                <td><strong>${escapeHTML(h.ticker)}</strong></td>
+                <td>${escapeHTML(h.name)}</td>
+                <td>${escapeHTML(accountDisplay(h))}</td>
+                <td>${money(h.marketValue)}</td>
+                <td>${money(h.costBasis)}</td>
+                <td class="bad">${signedMoney(h.gainLoss)}</td>
+                <td class="bad">${percent(h.gainLossPct)}</td>
+                <td>${escapeHTML(h.harvest.note)}</td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+    }
+
+    function renderHoldings() {
+      const sorted = [...holdings].sort((a, b) => compareValues(a, b, currentSort.key, currentSort.direction));
+
+      document.getElementById("holdingsTable").innerHTML = `
+        <table>
+          <thead>
+            <tr>
+              ${headerCell("ticker", "Ticker")}
+              ${headerCell("name", "Name")}
+              ${headerCell("account", "Account")}
+              ${headerCell("marketValue", "Market Value")}
+              ${headerCell("costBasis", "Cost Basis")}
+              ${headerCell("gainLoss", "Gain/Loss")}
+              ${headerCell("gainLossPct", "Gain/Loss %")}
+              ${headerCell("weight", "Weight")}
+              ${headerCell("rating", "Rating")}
+              <th>Notes</th>
+              <th>Harvest?</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${sorted.map(h => `
+              <tr>
+                <td><strong>${escapeHTML(h.ticker)}</strong></td>
+                <td>${escapeHTML(h.name)}</td>
+                <td>${escapeHTML(accountDisplay(h))}</td>
+                <td>${money(h.marketValue)}</td>
+                <td>${money(h.costBasis)}</td>
+                <td class="${h.gainLoss >= 0 ? "good" : "bad"}">${signedMoney(h.gainLoss)}</td>
+                <td class="${h.gainLossPct >= 0 ? "good" : "bad"}">${percent(h.gainLossPct)}</td>
+                <td>${percent(h.weight)}</td>
+                <td>
+                  <span class="pill ${ratingClass(h.rating)}">${Math.round(h.rating)} / 100</span>
+                  <div class="bar"><div class="bar-fill" style="width:${clamp(h.rating, 0, 100)}%;"></div></div>
+                </td>
+                <td>
+                  <strong>${escapeHTML(h.ratingLabel)}</strong><br>
+                  <span class="small">${escapeHTML(h.ratingNote)}</span>
+                </td>
+                <td>
+                  <span class="pill ${h.harvest.isCandidate ? "warn" : "good"}">
+                    ${h.harvest.isCandidate ? "Review" : "No"}
+                  </span>
+                  <div class="small">${escapeHTML(h.harvest.note)}</div>
+                </td>
+              </tr>
+            `).join("")}
+          </tbody>
+        </table>
+      `;
+
+      document.querySelectorAll("th[data-key]").forEach(th => {
+        th.addEventListener("click", () => {
+          const key = th.dataset.key;
+          if (currentSort.key === key) {
+            currentSort.direction = currentSort.direction === "asc" ? "desc" : "asc";
+          } else {
+            currentSort = { key, direction: "desc" };
+          }
+          renderHoldings();
+        });
+      });
+    }
+
+    function headerCell(key, label) {
+      const arrow = currentSort.key === key ? (currentSort.direction === "asc" ? " ↑" : " ↓") : "";
+      return `<th data-key="${key}">${escapeHTML(label + arrow)}</th>`;
+    }
+
+    function compareValues(a, b, key, direction) {
+      const av = a[key];
+      const bv = b[key];
+
+      let result;
+      if (typeof av === "number" && typeof bv === "number") {
+        result = av - bv;
+      } else {
+        result = String(av || "").localeCompare(String(bv || ""));
+      }
+
+      return direction === "asc" ? result : -result;
+    }
+
+    function rateHolding(h) {
+      const ticker = h.ticker.toUpperCase();
+      const override = RATING_OVERRIDES[ticker];
+
+      const concentrationPenalty = h.weight > 0.25 ? 18 :
+        h.weight > 0.15 ? 10 :
+        h.weight > 0.10 ? 5 : 0;
+
+      const lossPenalty = h.gainLossPct < -0.35 ? 10 :
+        h.gainLossPct < -0.20 ? 6 :
+        h.gainLossPct < -0.10 ? 3 : 0;
+
+      if (override) {
+        const score =
+          override.quality * 0.45 +
+          override.valuation * 0.25 +
+          (100 - override.risk) * 0.20 +
+          80 * 0.10 -
+          concentrationPenalty -
+          lossPenalty;
+
+        return {
+          score: clamp(score, 0, 100),
+          label: ratingText(score),
+          note: concentrationPenalty
+            ? `${override.note} Position size adds concentration risk.`
+            : override.note
+        };
+      }
+
+      const looksLikeETF = isLikelyETF(h);
+      const quality = looksLikeETF ? 75 : 55;
+      const valuation = h.gainLossPct < -0.20 ? 65 : h.gainLossPct > 1 ? 50 : 60;
+      const risk = looksLikeETF ? 30 : 55;
+
+      const score =
+        quality * 0.45 +
+        valuation * 0.25 +
+        (100 - risk) * 0.20 +
+        65 * 0.10 -
+        concentrationPenalty -
+        lossPenalty;
+
+      return {
+        score: clamp(score, 0, 100),
+        label: ratingText(score),
+        note: looksLikeETF
+          ? "Likely diversified fund/ETF. Add a manual override for better scoring."
+          : "No manual rating found. Score is generic; add this ticker to RATING_OVERRIDES."
+      };
+    }
+
+    function isLikelyETF(h) {
+      const text = `${h.ticker} ${h.name}`.toLowerCase();
+      return text.includes("etf") ||
+        text.includes("index") ||
+        text.includes("fund") ||
+        ["vti", "voo", "vt", "vxus", "bnd", "qqq", "schd", "vea", "vwo"].includes(h.ticker.toLowerCase());
+    }
+
+    function harvestStatus(h) {
+      const lossDollarThreshold = Number(document.getElementById("lossDollarThreshold").value || 0);
+      const lossPercentThreshold = Number(document.getElementById("lossPercentThreshold").value || 0) / 100;
+
+      if (!isTaxableAccount(h)) {
+        return { isCandidate: false, note: "Not taxable or not detected as taxable." };
+      }
+
+      if (h.gainLoss >= 0) {
+        return { isCandidate: false, note: "Position is not at a loss." };
+      }
+
+      if (Math.abs(h.gainLoss) < lossDollarThreshold) {
+        return { isCandidate: false, note: "Loss is below dollar threshold." };
+      }
+
+      if (Math.abs(h.gainLossPct) < lossPercentThreshold) {
+        return { isCandidate: false, note: "Loss is below percent threshold." };
+      }
+
+      const recentPurchase = h.purchaseDate && daysBetween(h.purchaseDate, new Date()) <= 30;
+      if (recentPurchase) {
+        return {
+          isCandidate: true,
+          note: "Candidate, but recent purchase date shown. Check wash-sale risk carefully."
+        };
+      }
+
+      return {
+        isCandidate: true,
+        note: "Candidate. Confirm no same/substantially identical purchases ±30 days."
+      };
+    }
+
+    function isTaxableAccount(h) {
+      const keywords = document.getElementById("taxableKeywords").value
+        .split(",")
+        .map(s => s.trim().toLowerCase())
+        .filter(Boolean);
+
+      const text = `${h.account} ${h.accountType}`.toLowerCase();
+
+      const retirementWords = [
+        "ira", "roth", "401", "403", "457", "hsa", "sep", "simple", "retirement"
+      ];
+
+      if (retirementWords.some(w => text.includes(w))) return false;
+      return keywords.some(k => text.includes(k));
+    }
+
+    function taxableValue() {
+      return holdings
+        .filter(isTaxableAccount)
+        .reduce((sum, h) => sum + h.marketValue, 0);
+    }
+
+    function weightedAverage(items, valueKey, weightKey) {
+      const totalWeight = items.reduce((sum, item) => sum + item[weightKey], 0);
+      if (!totalWeight) return 0;
+      return items.reduce((sum, item) => sum + item[valueKey] * item[weightKey], 0) / totalWeight;
+    }
+
+    function exportSummaryCSV() {
+      const header = [
+        "Ticker", "Name", "Account", "Market Value", "Cost Basis",
+        "Gain/Loss", "Gain/Loss %", "Weight", "Rating", "Rating Note",
+        "Harvest Candidate", "Harvest Note"
+      ];
+
+      const rows = holdings.map(h => [
+        h.ticker,
+        h.name,
+        accountDisplay(h),
+        h.marketValue,
+        h.costBasis,
+        h.gainLoss,
+        h.gainLossPct,
+        h.weight,
+        Math.round(h.rating),
+        h.ratingNote,
+        h.harvest.isCandidate ? "Yes" : "No",
+        h.harvest.note
+      ]);
+
+      const csv = [header, ...rows]
+        .map(row => row.map(csvEscape).join(","))
+        .join("\n");
+
+      const blob = new Blob([csv], { type: "text/csv" });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "investment-summary.csv";
+      a.click();
+      URL.revokeObjectURL(url);
+    }
+
+    function csvEscape(value) {
+      const s = String(value ?? "");
+      return `"${s.replace(/"/g, '""')}"`;
+    }
+
+    function accountDisplay(h) {
+      return [h.account, h.accountType].filter(Boolean).join(" / ") || "N/A";
+    }
+
+    function money(n) {
+      return new Intl.NumberFormat("en-US", {
+        style: "currency",
+        currency: "USD",
+        maximumFractionDigits: 0
+      }).format(n || 0);
+    }
+
+    function signedMoney(n) {
+      const formatted = money(Math.abs(n || 0));
+      return (n || 0) >= 0 ? `+${formatted}` : `-${formatted}`;
+    }
+
+    function percent(n) {
+      return new Intl.NumberFormat("en-US", {
+        style: "percent",
+        minimumFractionDigits: 1,
+        maximumFractionDigits: 1
+      }).format(n || 0);
+    }
+
+    function clamp(n, min, max) {
+      return Math.max(min, Math.min(max, n));
+    }
+
+    function ratingText(score) {
+      if (score >= 80) return "Strong";
+      if (score >= 65) return "Good";
+      if (score >= 50) return "Mixed";
+      if (score >= 35) return "Weak/speculative";
+      return "High risk";
+    }
+
+    function ratingClass(score) {
+      if (score >= 70) return "good";
+      if (score >= 50) return "warn";
+      return "bad";
+    }
+
+    function concentrationText(weight) {
+      if (weight > 0.35) return "Very concentrated";
+      if (weight > 0.25) return "High concentration";
+      if (weight > 0.15) return "Moderate concentration";
+      return "Reasonable";
+    }
+
+    function daysBetween(a, b) {
+      const ms = Math.abs(b.getTime() - a.getTime());
+      return ms / (1000 * 60 * 60 * 24);
+    }
+
+    function escapeHTML(value) {
+      return String(value ?? "")
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#039;");
+    }
+  </script>
+</body>
+</html>
